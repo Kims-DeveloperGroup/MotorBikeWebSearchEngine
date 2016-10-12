@@ -8,10 +8,12 @@ import java.io.IOException;
 /**
  * Created by root on 16. 8. 2.
  */
+
 @WebServlet(name = "Servlet", urlPatterns = "*.do")
 public class Servlet extends HttpServlet {
     protected void doPost(HttpServletRequest request, HttpServletResponse response) throws ServletException, IOException {
         System.out.println("Servlet Ok");
+
 
     }
 
