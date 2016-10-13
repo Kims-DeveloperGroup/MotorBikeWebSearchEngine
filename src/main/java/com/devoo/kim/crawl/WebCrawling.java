@@ -1,91 +1,68 @@
 package com.devoo.kim.crawl;
 
 
+import com.devoo.kim.storage.CrawlData;
 import com.devoo.kim.storage.WebPage;
-import org.apache.http.HttpConnection;
+import org.apache.http.Header;
+import org.apache.http.HttpResponse;
+import org.apache.http.client.HttpClient;
 import org.apache.http.client.methods.CloseableHttpResponse;
 import org.apache.http.client.methods.HttpGet;
-import org.apache.http.impl.DefaultHttpServerConnection;
 import org.apache.http.impl.client.CloseableHttpClient;
 import org.apache.http.impl.client.HttpClients;
-import sun.net.www.http.HttpClient;
 
 import java.io.*;
-import java.util.concurrent.Executor;
-import java.util.concurrent.ExecutorService;
-import java.util.concurrent.Executors;
 
 /**
  * Created by devoo-kim on 16. 10. 12.
  */
 public class WebCrawling extends CrawlTask {
-    byte[] content;
+    CloseableHttpClient httpClient = HttpClients.createDefault();
+    HttpGet httpGet;
+    CloseableHttpResponse response;
+
+    char[] content;
+    int status;
+    Header[] headers;
 
     public WebCrawling(String taskId) {
         super(taskId);
     }
 
+    public WebPage getFetchItem(){
+        WebPage page =null;// Retrieve from source list.
+        return page;
+    }
+
     @Override
     public WebPage call() throws Exception {
-        CloseableHttpClient httpclient = HttpClients.createDefault();
-
-        HttpGet httpGet = new HttpGet("http://www.naver.com");
+        WebPage page = getFetchItem();
+        httpGet = new HttpGet(page.url.toString());
+        response = httpClient.execute(httpGet);
+        status =response.getStatusLine().getStatusCode();
+        headers =response.getAllHeaders();
         try {
-            CloseableHttpResponse response = httpclient.execute(httpGet);
-            System.out.println(response.getStatusLine());
             BufferedReader reader = new BufferedReader(new InputStreamReader(response.getEntity().getContent()));
-            File file = new File("test.txt");
-            FileWriter writer = new FileWriter(file);
-            String input;
-            while ((input = reader.readLine())!=null){
-                writer.write(input);
-                System.out.println(input);
-            }
-            writer.close();
+            writeContent(reader, content);
         } catch (IOException e) {
-            e.printStackTrace();
+        }finally {
+            response.close();
         }
-        return null;
+        page.update(status, headers, content);
+        return page;
     }
-    public WebPage call2(){
-        CloseableHttpClient httpclient = HttpClients.createDefault();
 
-        HttpGet httpGet = new HttpGet("http://www.naver.com");
-        try {
-            CloseableHttpResponse response1 = httpclient.execute(httpGet);
-            System.out.println(response1.getStatusLine());
-            BufferedInputStream reader = new BufferedInputStream(response1.getEntity().getContent());
-            byte[] contents = new byte[1024]; // 100Kb
-
-            int input= reader.read(contents);
-            int offset= input;
-            int max = contents.length-input;
-
-            while ((input = reader.read(contents,offset, max-offset)) != -1
-                    || max<=0){
-                System.out.println(offset);
-                offset += input;
-                max -= input;
-            }
-
-
-            File file = new File("test2.txt");
-//            FileWriter writer = new FileWriter(file);
-            FileOutputStream out = new FileOutputStream(file);
-            out.write(contents);
-            out.flush();
-            reader.close();
-        } catch (IOException e) {
-            e.printStackTrace();
+    public void writeContent(Reader reader, char[] content) throws IOException {
+        content = new char[1024*100];
+        int input;
+        int offset=0;
+        int length = content.length;
+        while ((input=reader.read(content,offset, length))!=-1 && length>0){
+            offset+= input;
+            length-= input;
         }
-        return null;
-
     }
 
     public static void main(String[] args){
-        WebCrawling cralwer = new WebCrawling("Naver Crawler");
-        ExecutorService executorService = Executors.newFixedThreadPool(1);
-        executorService.submit(cralwer);
-
     }
 }
