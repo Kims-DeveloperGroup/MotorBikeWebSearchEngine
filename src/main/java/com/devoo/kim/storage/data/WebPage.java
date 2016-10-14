@@ -1,7 +1,6 @@
-package com.devoo.kim.storage;
+package com.devoo.kim.storage.data;
 
 import org.apache.http.Header;
-import org.apache.http.HttpEntity;
 
 import java.net.URL;
 
@@ -22,6 +21,7 @@ public class WebPage extends CrawlData {
 
     public void update(int staus, Header[] headers, char[] body) {
         super.update();
+        System.out.println("URL:"+url.toString()+" Status:"+ staus);
         //set Value with prams
     }
 }

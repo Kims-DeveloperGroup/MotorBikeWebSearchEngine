@@ -5,7 +5,7 @@ import java.util.concurrent.Callable;
 /**
  * Created by devoo-kim on 16. 10. 12.
  */
-abstract public class Task implements Callable{
+abstract public class Task<T1> implements Callable<T1>, Runnable{
     public static final byte NOT_IN_WORK=0;
     public static final byte STANDBY=1;
     public static final byte WORKING=2;
@@ -26,10 +26,12 @@ abstract public class Task implements Callable{
     }
 
     @Override
-    abstract public Object call() throws Exception;
+    abstract public T1 call() throws Exception;
 
-
-
-
-
+    @Override
+    public void run() {
+        try {
+            call();
+        } catch (Exception e) {}
+    }
 }

@@ -1,4 +1,4 @@
-package com.devoo.kim.storage;
+package com.devoo.kim.storage.data;
 
 /**
  * Created by devoo-kim on 16. 10. 12.
