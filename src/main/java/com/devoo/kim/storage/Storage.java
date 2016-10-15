@@ -6,20 +6,12 @@ import java.io.FileReader;
 /**
  * Created by devoo-kim on 16. 10. 14.
  */
-public abstract class Storage {
-    String path;
-    String id;
+public interface Storage {
 
-    public Storage(String path){
-        this.path =path;
+    static final String LOCAL_FILE_PROTOCOL = "file://";
+    static final String URL_PROTOCOL ="http://";
 
-    }
-
-    public void load(String path){
-
-    }
-    abstract void save(boolean overwrite);
-    public void update(){
-        save(false);
-    }
+    boolean save(String path, boolean overwrite);
+    boolean update(String path);
+    boolean load(String path);
 }

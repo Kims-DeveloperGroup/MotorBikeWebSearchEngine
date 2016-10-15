@@ -2,6 +2,7 @@ package com.devoo.kim.storage.data;
 
 import org.apache.http.Header;
 
+import java.net.MalformedURLException;
 import java.net.URL;
 
 /**
@@ -9,19 +10,32 @@ import java.net.URL;
  */
 public class WebPage extends CrawlData {
     public URL url;
+    public String urlStr;
     int staus;
     Header[] haeders;
-    char[] body;
+    String body;
 
-    public WebPage(URL url, int status, Header[] headers, char[] body){
+    public WebPage(String url, int status, Header[] headers, String bodyContent){
+        this(url, status, bodyContent);
+        headers = headers;
     }
 
-    public WebPage(String url, int status, char[] body){
+    public WebPage(String url, int status, String body){
+        this(url);
+        this.staus=status;
+        this.body =body;
     }
 
-    public void update(int staus, Header[] headers, char[] body) {
+    public WebPage(String url){
+        this.urlStr=url;
+        try {
+            this.url = new URL(url);
+        } catch (MalformedURLException e) {} // TODO: Handle Malformed Format of URL
+    }
+
+    public void update(int staus, Header[] headers, String body) {
         super.update();
-        System.out.println("URL:"+url.toString()+" Status:"+ staus);
+        System.out.println("URL:"+urlStr+" Status:"+ staus);//// TODO: 16. 10. 15 Logging 
         //set Value with prams
     }
 }

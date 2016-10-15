@@ -22,7 +22,7 @@ public class Crawler {
     public Crawler(String inputPath, String outputPath){
         this.inputPath = inputPath;
         this.outputPath= outputPath;
-        // TODO: Required to Set Cofiguration of Crawler and Crawling Tasks
+        // TODO: Required to Set Cofiguration of Crawler and Crawling TaskGenerator
         scheduler = new Scheduler();
     }
 
@@ -30,19 +30,25 @@ public class Crawler {
         List<String> seedUrls;
         Path path = Paths.get(inputPath);
         File input;
+
         try {
             seedUrls = Files.readAllLines(path);
             String url;
             Iterator<String> it = seedUrls.iterator();
-            while ((url =it.next())!=null){
+            while (it.hasNext()){
+                url =it.next();
+                // TODO: 16. 10. 15 Generates tasks and sumbit through TaskGenerator.class
                 Future<WebPage> result =scheduler.submitTask(new WebCrawling("Crawling "+url, url));
-//                WebPage page =result.get();
+                result.get();
             }
+            scheduler.shutdown(); //be here
+
         } catch (Exception e) { return;}
     }
 
     public static void main(String[] args){
         Crawler crawler = new Crawler("seed.txt", "output.txt");
         crawler.run();
+        return;
     }
 }

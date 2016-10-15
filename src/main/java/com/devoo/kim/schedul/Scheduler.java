@@ -2,20 +2,19 @@ package com.devoo.kim.schedul;
 
 import com.devoo.kim.task.Task;
 
-import java.util.concurrent.Callable;
-import java.util.concurrent.ExecutorService;
-import java.util.concurrent.Executors;
-import java.util.concurrent.Future;
+import java.util.concurrent.*;
 import java.util.concurrent.atomic.AtomicInteger;
 
 /**
  * Created by devoo-kim on 16. 10. 14.
  */
 public class Scheduler<T1> { // TODO: Hadle Multi-Thread Issue
+
     private int threads=-1;
     AtomicInteger currTasks = new AtomicInteger(0);
     AtomicInteger totalTasks = new AtomicInteger(0);
-    private final long startTime;
+    private long totalWorkingTime;
+    private long startTime;
     private long endTime;
     private long timeout;
     ExecutorService executorService;//// TODO: NOT Thread-Safe
@@ -37,7 +36,21 @@ public class Scheduler<T1> { // TODO: Hadle Multi-Thread Issue
         return executorService.submit(task);
     }
 
-    public void terminate(){
-        //TODO: Terminate this and kill working thread at all.
+    public void shutdown(){
+        //TODO: Terminate this and kill working thread properly.(Current Problem)
+        try {
+            if (executorService.awaitTermination(20L, TimeUnit.SECONDS))
+                System.out.println("All TaskGenerator are executed.");
+            endTime =System.currentTimeMillis();
+            totalWorkingTime = endTime -startTime;
+            System.out.println("Total Working Time(/sec): " + totalWorkingTime/1000+ "(sec)");// TODO: 16. 10. 15 Log
+            executorService.shutdown();
+        } catch (InterruptedException e) {
+            e.printStackTrace();
+        }
+    }
+
+    public int getThreadNumber() {
+        return threads;
     }
 }

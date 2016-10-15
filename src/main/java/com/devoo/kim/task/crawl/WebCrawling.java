@@ -1,11 +1,14 @@
 package com.devoo.kim.task.crawl;
 
 
-import com.devoo.kim.schedul.Scheduler;
 import com.devoo.kim.storage.data.WebPage;
 import org.apache.http.Header;
+import org.apache.http.HttpResponse;
+import org.apache.http.client.HttpResponseException;
+import org.apache.http.client.ResponseHandler;
 import org.apache.http.client.methods.CloseableHttpResponse;
 import org.apache.http.client.methods.HttpGet;
+import org.apache.http.impl.client.BasicResponseHandler;
 import org.apache.http.impl.client.CloseableHttpClient;
 import org.apache.http.impl.client.HttpClients;
 
@@ -13,28 +16,29 @@ import java.io.BufferedReader;
 import java.io.IOException;
 import java.io.InputStreamReader;
 import java.io.Reader;
-import java.util.concurrent.ExecutionException;
-import java.util.concurrent.ExecutorService;
-import java.util.concurrent.Executors;
-import java.util.concurrent.Future;
 
 /**
  * Created by devoo-kim on 16. 10. 12.
  */
+// TODO: 16. 10. 15 Integrate HttpClinet(for Request and Response over Network)
+// TODO:             with jSoup for parsing html dom
 public class WebCrawling extends Crawling {
+
+
+
     CloseableHttpClient httpClient = HttpClients.createDefault();
     HttpGet httpGet;
     CloseableHttpResponse response;
 
     WebPage page;
     String url;
-    char[] content;
+    String content;
     int status;
     Header[] headers;
 
     public WebCrawling(String taskId, String url) {
         super(taskId);
-        page = new WebPage(url, -1, null);
+        page = new WebPage(url);
         System.out.println(taskId);
     }
 
@@ -46,35 +50,25 @@ public class WebCrawling extends Crawling {
     @Override
     public WebPage call() throws Exception {
         WebPage page = getFetchItem();
-        httpGet = new HttpGet(page.url.toString());
+        httpGet = new HttpGet(page.urlStr);
         response = httpClient.execute(httpGet);  // TODO: Stuck and Blocked (NOT SOLVED)
+        content = new BasicResponseHandler().handleResponse(response);
         status =response.getStatusLine().getStatusCode();
         headers =response.getAllHeaders();
         System.out.println(url+" status: "+ status);
-        try {
-            BufferedReader reader = new BufferedReader(new InputStreamReader(response.getEntity().getContent()));
-            writeContent(reader, content);
-        } catch (IOException e) {
-        }finally {
-            response.close();
-        }
+        System.out.println("Content: "+ content);
+        response.close();
         page.update(status, headers, content);
-        return page;
-    }
-
-    public void writeContent(Reader reader, char[] content) throws IOException {
-        content = new char[1024*100];
-        int input;
-        int offset=0;
-        int length = content.length;
-        while ((input=reader.read(content,offset, length))!=-1 && length>0){
-            offset+= input;
-            length-= input;
-        }
+        return page; // TODO: Caller handles page to be store. 
     }
 
     public static void main(String[] args){
-        Scheduler<WebPage> scheduler = new Scheduler<>(1);
-        Future<WebPage>  future =scheduler.submitTask(new WebCrawling("id", "http://www.naver.com/"));
+        String url = "http://www.naver.com/";
+        WebCrawling crawling = new WebCrawling("", url);
+        try {
+            crawling.call();
+        } catch (Exception e) {
+            e.printStackTrace();
+        }
     }
 }
