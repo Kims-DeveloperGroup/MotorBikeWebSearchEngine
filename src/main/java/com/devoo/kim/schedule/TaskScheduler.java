@@ -1,6 +1,7 @@
-package com.devoo.kim.schedul;
+package com.devoo.kim.schedule;
 
 import com.devoo.kim.task.Task;
+import com.devoo.kim.task.TaskGenerator;
 
 import java.util.concurrent.*;
 import java.util.concurrent.atomic.AtomicInteger;
@@ -8,7 +9,7 @@ import java.util.concurrent.atomic.AtomicInteger;
 /**
  * Created by devoo-kim on 16. 10. 14.
  */
-public class Scheduler<T1> { // TODO: Hadle Multi-Thread Issue
+public class TaskScheduler<T1> { // TODO: Hadle Multi-Thread Issue
 
     private int threads=-1;
     AtomicInteger currTasks = new AtomicInteger(0);
@@ -19,14 +20,18 @@ public class Scheduler<T1> { // TODO: Hadle Multi-Thread Issue
     private long timeout;
     ExecutorService executorService;//// TODO: NOT Thread-Safe
 
-    public Scheduler(){
+    public TaskScheduler(){
         this(Runtime.getRuntime().availableProcessors());
     }
 
-    public Scheduler(int threads){
+    public TaskScheduler(int threads){
         this.threads = threads;
         startTime = System.currentTimeMillis();
         executorService = Executors.newFixedThreadPool(this.threads);
+    }
+    
+    public void submitTask(TaskGenerator taskGenerator){
+        // TODO: 16. 10. 17 Being provided with tasks from task Generator. 
     }
 
     public Future<T1> submitTask(Callable<T1> task){
