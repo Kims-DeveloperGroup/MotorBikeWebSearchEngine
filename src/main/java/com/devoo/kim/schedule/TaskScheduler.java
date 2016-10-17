@@ -2,6 +2,7 @@ package com.devoo.kim.schedule;
 
 import com.devoo.kim.task.Task;
 import com.devoo.kim.task.TaskGenerator;
+import com.devoo.kim.task.crawl.Crawler;
 
 import java.util.concurrent.*;
 import java.util.concurrent.atomic.AtomicInteger;
@@ -19,40 +20,59 @@ public class TaskScheduler<T1> { // TODO: Hadle Multi-Thread Issue
     private long endTime;
     private long timeout;
     ExecutorService executorService;//// TODO: NOT Thread-Safe
+    BlockingQueue<Future> submissions;
+    BlockingQueue<Task> taskQueue;
+    Crawler crawler; //Caller of this
 
-    public TaskScheduler(){
-        this(Runtime.getRuntime().availableProcessors());
+    public TaskScheduler(Crawler crawler, BlockingQueue<Task> taskQueue, int threads){        this.startTime = System.currentTimeMillis();
+        this.threads = Runtime.getRuntime().availableProcessors();
+        this.executorService = Executors.newFixedThreadPool(threads);
+        this.taskQueue =taskQueue;
+        this.crawler=crawler;
+        submissions = new LinkedBlockingQueue<>(threads+2); //// TODO: 16. 10. 17 Find out the appropriate number of tasks to be submitted.
     }
 
-    public TaskScheduler(int threads){
-        this.threads = threads;
-        startTime = System.currentTimeMillis();
-        executorService = Executors.newFixedThreadPool(this.threads);
+    public TaskScheduler(Crawler crawler, BlockingQueue<Task> taskQueue){
+        this(crawler, taskQueue, Runtime.getRuntime().availableProcessors());
     }
     
     public void submitTask(TaskGenerator taskGenerator){
         // TODO: 16. 10. 17 Being provided with tasks from task Generator. 
     }
 
-    public Future<T1> submitTask(Callable<T1> task){
-        currTasks.incrementAndGet();
-        totalTasks.incrementAndGet();
-        //TODO: Required to think about whether to return complete result or to return a pending result of the task.
-        return executorService.submit(task);
+    public void submitTasks(){ /**Incomplete yet***/
+        Callable task;
+        Future future;
+        while (true){
+            try {
+                task =taskQueue.take(); /**Possibly Blocked**/
+                future=executorService.submit(task);
+                submissions.put(future); /**Possibly Blocked**/
+                // TODO: 16. 10. 17 Monitor Future instances in submissions whether it is complete or not. If it's complete, remove and process
+                // TODO: 16. 10. 17 Implement a module to take complete future from submission in order to make space to add.
+            } catch (InterruptedException e) {
+                e.printStackTrace();
+            }
+        }
+    }
+
+    public boolean canSubmit(){
+
     }
 
     public void shutdown(){
-        //TODO: Terminate this and kill working thread properly.(Current Problem)
+        //TODO: Terminate this and kill working thread properly.(Revised to be tested)
         try {
-            if (executorService.awaitTermination(20L, TimeUnit.SECONDS))
-                System.out.println("All TaskGenerator are executed.");
-            endTime =System.currentTimeMillis();
-            totalWorkingTime = endTime -startTime;
-            System.out.println("Total Working Time(/sec): " + totalWorkingTime/1000+ "(sec)");// TODO: 16. 10. 15 Log
-            executorService.shutdown();
+            if (!executorService.awaitTermination(10L, TimeUnit.SECONDS))
+                executorService.shutdownNow();
+            if (!executorService.awaitTermination(10L, TimeUnit.SECONDS)) //Double Check of ThreadPool and Tasks being terminated at all.
+                executorService.shutdownNow();
         } catch (InterruptedException e) {
-            e.printStackTrace();
+            executorService.shutdownNow(); //To handle the case of Thread  interruption.
         }
+        endTime =System.currentTimeMillis();
+        totalWorkingTime = endTime -startTime;
+        System.out.println("Total Working Time(/sec): " + totalWorkingTime/1000+ "(sec)");// TODO: 16. 10. 15 Log
     }
 
     public int getThreadNumber() {

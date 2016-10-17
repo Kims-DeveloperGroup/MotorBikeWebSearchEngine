@@ -1,27 +1,30 @@
 package com.devoo.kim.task.crawl;
 
 import com.devoo.kim.schedule.TaskScheduler;
-import com.devoo.kim.storage.StorageManager;
+import com.devoo.kim.storage.StorageLoader;
 import com.devoo.kim.storage.data.WebPage;
+import com.devoo.kim.task.Task;
 import com.devoo.kim.task.TaskGenerator;
 
 import java.io.File;
-import java.nio.file.Files;
 import java.nio.file.Path;
 import java.nio.file.Paths;
-import java.util.Iterator;
 import java.util.List;
-import java.util.concurrent.Future;
+import java.util.concurrent.BlockingQueue;
+import java.util.concurrent.LinkedBlockingQueue;
 
 /**
  * Created by devoo-kim on 16. 10. 14.
  */
 public class Crawler {
-    String inputPath;
-    String outputPath;
+    String[] inputPath;
+    String[] outputPath;
     TaskScheduler<WebPage> taskScheduler;
+    TaskGenerator taskGenerator;
+    private BlockingQueue<Task> taskQueue = new LinkedBlockingQueue<>(16); // TODO: 16. 10. 17  Configure capacity of TaskQueue to balance task load
+    StorageLoader storageLoader = new StorageLoader();
 
-    public Crawler(String inputPath, String outputPath){
+    public Crawler(String[] inputPath, String[] outputPath){
         this.inputPath = inputPath;
         this.outputPath= outputPath;
         // TODO: Required to Set Cofiguration of Crawler and Crawling TaskGenerator
@@ -29,25 +32,15 @@ public class Crawler {
     }
 
     public void run(){
-        List<String> seedUrls;
-        Path path = Paths.get(inputPath);
-        File input;
+
 
         try {
             // TODO: 16. 10. 16 Read input sources to generate tasks.
-//            readInputSources(paths);
-//            seedUrls = Files.readAllLines(path);
-//            String url;
-//            Iterator<String> it = seedUrls.iterator();
-//            while (it.hasNext()){
-//                url =it.next();
-//                 TODO: 16. 10. 15 Generates tasks through TaskGenerator.class & Submit them to TaskScheduler(com.devoo.kim.schedule)
-//                Future<WebPage> result = taskScheduler.submitTask(new WebCrawling("Crawling "+url, url));
-//                result.get();
-//            }
-            TaskGenerator tasks = new TaskGenerator(readInputSources("path"), taskScheduler);
-            taskScheduler
+            storageLoader.initialize(inputPath);
+//             TODO: 16. 10. 15 Generates tasks through TaskGenerator.class & Submit them to TaskScheduler(com.devoo.kim.schedule)
+            TaskGenerator tasks = new TaskGenerator(storageLoader.getStorages(), taskQueue);
             tasks.run();
+            taskScheduler.
 
 
             taskScheduler.shutdown(); //be here
@@ -55,8 +48,8 @@ public class Crawler {
         } catch (Exception e) { return;}
     }
     
-    private StorageManager readInputSources(String... paths){
-        // TODO: 16. 10. 16 Instantiate Storage Instances(com.devoo.kim.storage) to load physical storage on memory.
+    private StorageLoader readInputSources(String... paths){
+        // TODO: 16. 10. 16 Instantiate Storage Instances(com.devoo.kim.storage) to initialize physical storage on memory.
 
         for (String path :paths){
             // TODO: 16. 10. 17 By using com.devoo.kim.storage.StorageManagers and TaskGenerator(com.devoo.kim.task)
@@ -65,8 +58,8 @@ public class Crawler {
     }
 
     public static void main(String[] args){
-        Crawler crawler = new Crawler("seed.txt", "output.txt");
-        crawler.run();
+//        Crawler crawler = new Crawler({"seed.txt"}, {"output.txt"});
+//        crawler.run();
         return;
     }
 }

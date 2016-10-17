@@ -1,17 +1,21 @@
 package com.devoo.kim.storage;
 
+import java.io.Closeable;
 import java.io.File;
 import java.io.FileReader;
 
 /**
- * Created by devoo-kim on 16. 10. 14.
+ *@Responsibility: An abstraction of storage loaded on memory. e.g) Local File System, HDFS, etc.
+ *
+ * @Behavior: This interface is not a concrete, but offers interface to implement concrete behaviors.
  */
-public interface Storage {
+public interface Storage<T1> extends Closeable{
 
     static final String LOCAL_FILE_PROTOCOL = "file://";
     static final String URL_PROTOCOL ="http://";
 
-    boolean save(String path, boolean overwrite);
-    boolean update(String path);
-    boolean load(String path);
+    public boolean connect();
+    public boolean isValid();
+    public T1 load() throws Exception;
+    // TODO: 16. 10. 17 Think how to implement close();
 }
