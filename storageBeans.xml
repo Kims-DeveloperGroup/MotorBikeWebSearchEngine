@@ -7,7 +7,7 @@
 <!-- Storage Beans-->
 
     <!-- Local File System -->
-    <bean id="file" class="com.devoo.kim.storage.LocalFileSystem"/>
+    <bean id="file" class="com.devoo.kim.storage.fs.hdfs.LocalFileSystem"/>
 
 
 

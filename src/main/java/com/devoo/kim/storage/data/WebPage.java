@@ -4,6 +4,8 @@ import org.apache.http.Header;
 
 import java.net.MalformedURLException;
 import java.net.URL;
+import java.util.HashMap;
+import java.util.Map;
 
 /**
  * Created by devoo-kim on 16. 10. 12.
@@ -11,6 +13,7 @@ import java.net.URL;
 public class WebPage extends CrawlData {
     public URL url;
     public String urlStr;
+    private Map<String, WebPage> outlinks= new HashMap<>(4);// TODO: 16. 10. 18 How-To-Handle 
     int staus;
     Header[] haeders;
     String body;

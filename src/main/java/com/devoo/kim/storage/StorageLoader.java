@@ -17,12 +17,9 @@ import java.util.HashMap;
  */
 /**@Thread-safe*/
 public class StorageLoader {
-
-    private boolean isInitialized =false;
-    private HashMap<String, Storage> storages;
-    URI uri;
-    
     long initTime;
+    private boolean isInitialized =false;
+    private HashMap<String, Storage> storages;/**@Must:Immutable*/
 
     public HashMap<String, Storage> getStorages() throws Exception {
         if (!isInitialized) throw new Exception();// TODO: 16. 10. 17 Define Custom InitializedException to prevent change.
@@ -39,6 +36,7 @@ public class StorageLoader {
     public void initialize(String... paths) throws Exception {// TODO: 16. 10. 17 Not Nomalize uri yet. 
         if (isInitialized) throw new Exception(); // TODO: 16. 10. 17 Define Custom InitializedException to prevent change. 
         isInitialized= true;
+        initTime=System.currentTimeMillis();
         ApplicationContext context =Contexts.STORAGES;
         URI uri;
         for (String path: paths){

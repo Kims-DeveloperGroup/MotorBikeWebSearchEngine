@@ -1,8 +1,11 @@
-package com.devoo.kim.storage;
+package com.devoo.kim.storage.fs.hdfs;
 
-import java.io.File;
-import java.io.FilenameFilter;
-import java.io.IOException;
+import com.devoo.kim.storage.Storage;
+import com.devoo.kim.storage.data.CrawlData;
+
+import java.io.*;
+import java.nio.file.Files;
+import java.nio.file.Paths;
 
 /**
  * LocalFileSystem implements Storage<File[]>
@@ -14,11 +17,12 @@ import java.io.IOException;
 public class LocalFileSystem implements Storage<File[]> {
 
     private static class CrawlDataFilter implements FilenameFilter{
-        public final String EXTENSION =".crawl";
+        public final String CRAWL_DATA_EXTENSION =".crawl";
+        public final String URLS_EXTENSION =".urls";
 
         @Override
         public boolean accept(File dir, String name) {
-            return name.toLowerCase().endsWith(EXTENSION);
+            return name.toLowerCase().endsWith(CRAWL_DATA_EXTENSION) ||name.toLowerCase().endsWith(URLS_EXTENSION);
         }
     }
 
@@ -27,7 +31,6 @@ public class LocalFileSystem implements Storage<File[]> {
     private static CrawlDataFilter fileFilter = new CrawlDataFilter();
     public LocalFileSystem(String path) throws Exception {
         rootDir = new  File(path);
-
         if(!isValid()){
             throw new Exception();
         }
@@ -54,6 +57,20 @@ public class LocalFileSystem implements Storage<File[]> {
         if (!isValid()) throw new Exception();
         if (files==null)files =rootDir.listFiles(fileFilter);
         return files.clone(); //CopyOnWrite
+    }
+
+    public void convertURLStoCrawlData(File urlsFile){
+        if(!urlsFile.getName().endsWith(fileFilter.URLS_EXTENSION)) return;
+        try {
+            Files.readAllLines(urlsFile.toPath());
+        } catch (IOException e) {}
+
+    }
+
+    @Override
+    public CrawlData readCrawlData() throws Exception {
+        if (files==null) throw new Exception(); // TODO: 16. 10. 18 Define UserDefined Exception (CrawlDataLoadException)
+        return null;
     }
 
     public File[] reload() throws Exception {

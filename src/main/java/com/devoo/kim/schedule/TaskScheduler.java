@@ -35,10 +35,6 @@ public class TaskScheduler<T1> { // TODO: Hadle Multi-Thread Issue
     public TaskScheduler(Crawler crawler, BlockingQueue<Task> taskQueue){
         this(crawler, taskQueue, Runtime.getRuntime().availableProcessors());
     }
-    
-    public void submitTask(TaskGenerator taskGenerator){
-        // TODO: 16. 10. 17 Being provided with tasks from task Generator. 
-    }
 
     public void submitTasks(){ /**Incomplete yet***/
         Callable task;
@@ -56,12 +52,9 @@ public class TaskScheduler<T1> { // TODO: Hadle Multi-Thread Issue
         }
     }
 
-    public boolean canSubmit(){
-        return false;
-    }
-
     public void shutdown(){
         //TODO: Terminate this and kill working thread properly.(Revised to be tested)
+        //TODO: Submissions.isEmpty() && taskQueue.isEmpty() && TaskGen.status== 'Complete/Terminate'
         try {
             if (!executorService.awaitTermination(10L, TimeUnit.SECONDS))
                 executorService.shutdownNow();
