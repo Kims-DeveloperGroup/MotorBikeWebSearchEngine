@@ -40,11 +40,6 @@ public class Crawler {
 //             TODO: 16. 10. 15 Generates tasks through TaskGenerator.class & Submit them to TaskScheduler(com.devoo.kim.schedule)
             TaskGenerator tasks = new TaskGenerator(storageLoader.getStorages(), taskQueue);
             tasks.run();
-            taskScheduler.
-
-
-            taskScheduler.shutdown(); //be here
-
         } catch (Exception e) { return;}
     }
     
