@@ -1,8 +1,11 @@
 package com.devoo.kim.task;
 
 import com.devoo.kim.storage.Storage;
+import com.devoo.kim.storage.data.CrawlData;
+import com.devoo.kim.storage.fs.CrawlDataFile;
 
 import java.util.HashMap;
+import java.util.Iterator;
 import java.util.Map;
 import java.util.concurrent.BlockingQueue;
 
@@ -27,20 +30,21 @@ public class TaskGenerator<T1> extends Thread {// TODO: Handle Multi-Thread Issu
 
     @Override
     public void run() {
-
+        String key;
+        Storage storage;
+        Iterator<CrawlData> iterator;
+        Task newTask;
         for (Map.Entry<String, Storage> storageEntry : storages.entrySet()){
-            String key = storageEntry.getKey();
-            Storage storage = storageEntry.getValue();
+            key = storageEntry.getKey();
+            storage = storageEntry.getValue();
             if (!storage.isValid()){
                 // TODO: 16. 10. 18 Log: Metadata of Invalid Storage
                 continue;
             }
             try{
-                storage.load();
-                while (true){
-
-                    Task newTask;
-
+                iterator=storage.load().iterateCrawlData();
+                while (iterator.hasNext()){
+                    //// TODO: 16. 10. 19 CrawlData(:WebPage) and Task(:Crawling, WebCrawling) 
                 }
             }catch (Exception e){}
 

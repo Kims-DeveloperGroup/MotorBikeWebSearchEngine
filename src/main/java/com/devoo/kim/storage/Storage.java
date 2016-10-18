@@ -1,17 +1,19 @@
 package com.devoo.kim.storage;
 
 import com.devoo.kim.storage.data.CrawlData;
+import com.devoo.kim.storage.fs.CrawlDataFile;
 
 import java.io.Closeable;
 import java.io.File;
 import java.io.FileReader;
+import java.util.Iterator;
 
 /**
  *@Responsibility: An abstraction of storage loaded on memory. e.g) Local File System, HDFS, etc.
  *
  * @Behavior: This interface is not a concrete, but offers interface to implement concrete behaviors.
  */
-public interface Storage<T1> extends Closeable{
+public interface Storage extends Closeable{
 
     static final String LOCAL_FILE_PROTOCOL = "file://";
     static final String URL_PROTOCOL ="http://";
@@ -34,7 +36,7 @@ public interface Storage<T1> extends Closeable{
      * @return Loaded data set/files
      * @throws Exception in case of failure
      */
-    public T1 load() throws Exception;
+    public Storage load() throws Exception;
 
     /**
      * Tries to reload data/files on memory from physical storage.
@@ -42,13 +44,13 @@ public interface Storage<T1> extends Closeable{
      * @return
      * @throws Exception
      */
-    public T1 reload() throws Exception;
+    public Storage reload() throws Exception;
 
     /***
      * Iterates 'CrawlData-s' from the beginning of loaded data,
      * and generates 'Task' with 'CrawlData'
      * @return an instance of 'Task'
      */
-    public CrawlData readCrawlData() throws Exception;
+    public Iterator<CrawlData> iterateCrawlData();
     // TODO: 16. 10. 17 Think how to implement close();
 }

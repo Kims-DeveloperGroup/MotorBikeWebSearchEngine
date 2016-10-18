@@ -1,5 +1,6 @@
 package com.devoo.kim.task.parse;
 
+import com.devoo.kim.storage.data.CrawlData;
 import com.devoo.kim.task.Task;
 
 /**
@@ -7,8 +8,8 @@ import com.devoo.kim.task.Task;
  */
 public class Parser extends Task {
 
-    public Parser(String taskId) {
-        super(taskId);
+    public Parser(CrawlData crawlData) {
+        super(crawlData);
     }
 
     @Override

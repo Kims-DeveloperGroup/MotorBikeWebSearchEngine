@@ -1,6 +1,7 @@
 package com.devoo.kim.task.crawl;
 
 
+import com.devoo.kim.storage.data.CrawlData;
 import com.devoo.kim.storage.data.WebPage;
 import org.apache.http.Header;
 import org.apache.http.HttpResponse;
@@ -36,10 +37,10 @@ public class WebCrawling extends Crawling {
     int status;
     Header[] headers;
 
-    public WebCrawling(String taskId, String url) {
-        super(taskId);
+    public WebCrawling(CrawlData crawlData) {
+        super(crawlData);
         page = new WebPage(url);
-        System.out.println(taskId);
+        System.out.println(crawlData);
     }
 
     public WebPage getFetchItem(){
@@ -62,13 +63,5 @@ public class WebCrawling extends Crawling {
         return page; // TODO: Caller handles page to be store. 
     }
 
-    public static void main(String[] args){
-        String url = "http://www.naver.com/";
-        WebCrawling crawling = new WebCrawling("", url);
-        try {
-            crawling.call();
-        } catch (Exception e) {
-            e.printStackTrace();
-        }
-    }
+    public static void main(String[] args){}
 }

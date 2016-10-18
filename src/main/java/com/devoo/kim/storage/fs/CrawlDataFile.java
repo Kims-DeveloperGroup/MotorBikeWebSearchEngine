@@ -6,13 +6,12 @@ import java.io.*;
 import java.nio.file.Files;
 import java.nio.file.Path;
 import java.nio.file.Paths;
+import java.util.Iterator;
 import java.util.LinkedList;
 import java.util.List;
 
-import static java.lang.System.in;
-
 /**
- * Created by devoo-kim on 16. 10. 18.
+ * @NOTE: CopyOnWrite Operation is employed.
  */
 public class CrawlDataFile implements Serializable{ // TODO: Handle Overwrite && Update Operation. 
 
@@ -20,19 +19,28 @@ public class CrawlDataFile implements Serializable{ // TODO: Handle Overwrite &&
     public static final String EXTENSION =".crawl";
     File file;
     String pathStr;
-    private List<CrawlData> listOfCrawlData = new LinkedList<>();
+    private LinkedList<CrawlData> listOfCrawlData = new LinkedList<>();
     transient Path path;
 
 
-    public CrawlDataFile(Path path, boolean overwrite) throws Exception {
-        this(path.toString(), overwrite);
+    public CrawlDataFile(Path path) throws Exception {
+        this(path.toString());
     }
 
-    public CrawlDataFile(String pathname, boolean overwrite) throws Exception {
+    public CrawlDataFile(String pathname) throws Exception {
         if (!pathname.toLowerCase().endsWith(EXTENSION)) this.pathStr =pathname+EXTENSION;
         this.path=Paths.get(this.pathStr);
         this.file = path.toFile();
-        if (this.file.exists() && !overwrite) loadFile();
+    }
+
+    /**
+     *
+     * @return a clone of 'Iterator<CrawlData>' for 'CopyOnWrite'
+     */
+
+    public Iterator<CrawlData> iterateCrawlData(){
+        LinkedList<CrawlData> clone = (LinkedList<CrawlData>) listOfCrawlData.clone();
+        return clone.iterator();
     }
 
     public void add(CrawlData crawlData){
@@ -47,13 +55,18 @@ public class CrawlDataFile implements Serializable{ // TODO: Handle Overwrite &&
         in.close();
     }
 
+    // TODO: 16. 10. 19 Whether to overwrite or not is flaged here.
     public void createNewFile(boolean overwrite) throws IOException {
         if (overwrite &&file.exists()) Files.delete(this.path);
         ObjectOutputStream out = new ObjectOutputStream(new FileOutputStream(file));
         out.writeObject(this);
     }
 
-    public List<CrawlData> getListOfCrawlData() {
-        return listOfCrawlData;
+    /***
+     *
+     * @return a clone of 'LinkedList<CrawlData>' for 'CopyOnWrite'
+     */
+    public LinkedList<CrawlData> getListOfCrawlData() {
+        return (LinkedList<CrawlData>)listOfCrawlData.clone();
     }
 }

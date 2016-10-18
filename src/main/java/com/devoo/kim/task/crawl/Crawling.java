@@ -1,5 +1,6 @@
 package com.devoo.kim.task.crawl;
 
+import com.devoo.kim.storage.data.CrawlData;
 import com.devoo.kim.task.Task;
 
 /**
@@ -8,9 +9,10 @@ import com.devoo.kim.task.Task;
 abstract public class Crawling extends Task {
 
     private byte[] content;
+    private CrawlData crawlData;
 
-    public Crawling(String taskId){
-        super(taskId);
+    public Crawling(CrawlData crawlData){
+        this.crawlData =crawlData;
     }
 
 }

@@ -1,5 +1,7 @@
 package com.devoo.kim.task;
 
+import com.devoo.kim.storage.data.CrawlData;
+
 import java.util.concurrent.Callable;
 
 /**
@@ -20,10 +22,6 @@ abstract public class Task<T1> implements Callable<T1>, Runnable{
     private int activatedTime=-1;
     private int devativatedTime=-1;
     private int throughput=-1; //Byte
-
-    public Task(String taskId){
-        this.taskId = taskId;
-    }
 
     @Override
     abstract public T1 call() throws Exception;

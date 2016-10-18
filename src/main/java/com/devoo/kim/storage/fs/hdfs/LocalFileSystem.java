@@ -2,19 +2,23 @@ package com.devoo.kim.storage.fs.hdfs;
 
 import com.devoo.kim.storage.Storage;
 import com.devoo.kim.storage.data.CrawlData;
+import com.devoo.kim.storage.fs.CrawlDataFile;
 
 import java.io.*;
-import java.nio.file.Files;
-import java.nio.file.Paths;
+import java.util.Iterator;
+import java.util.LinkedList;
 
 /**
  * LocalFileSystem implements Storage<File[]>
  *
  *@Responsibility: An abstraction of Local File System loaded on memory
  *
- * @Behavior: This class offers an access to Local File System, which contains files of 'CrawlData-s'
+ * @Behavior: This class offers an access to Local File System, which contains crawlDataFiles of 'CrawlData-s'
+ * @NOTE: When loading 'CrawlDataFile-s' from File System to generate 'CrawlData-s',
+ *        too large size or too many of 'CrawlData-s' may cause 'OutOfMemoryError', or long blocking time(Delay).
+ *        Also that could reduce performance of the application.
  */
-public class LocalFileSystem implements Storage<File[]> {
+public class LocalFileSystem implements Storage {
 
     private static class CrawlDataFilter implements FilenameFilter{
         public final String CRAWL_DATA_EXTENSION =".crawl";
@@ -27,7 +31,7 @@ public class LocalFileSystem implements Storage<File[]> {
     }
 
     File rootDir;
-    File[] files;
+    CrawlDataFile[] crawlDataFiles;
     private static CrawlDataFilter fileFilter = new CrawlDataFilter();
     public LocalFileSystem(String path) throws Exception {
         rootDir = new  File(path);
@@ -52,31 +56,75 @@ public class LocalFileSystem implements Storage<File[]> {
                 rootDir.canExecute() && rootDir.canRead());
     }
 
+    /**
+     * Load 'File-s' with '.crawl' extension and Store them in a type of 'CrawlDataFile'.
+     * if 'CrawlDataFile-s' have been loaded, the previously loaded are returned.
+     * @NOTE: The returned is a clone.
+     * @return
+     * @throws Exception
+     */
+
     @Override
-    public File[] load() throws Exception {
+    public Storage load() throws Exception {
         if (!isValid()) throw new Exception();
-        if (files==null)files =rootDir.listFiles(fileFilter);
-        return files.clone(); //CopyOnWrite
+        File[] files;
+        if (this.crawlDataFiles ==null){
+            files =rootDir.listFiles(fileFilter);
+            this.crawlDataFiles = new CrawlDataFile[crawlDataFiles.length];
+            castFileToCrawlDataFile(files, this.crawlDataFiles);
+        }
+        return this;
     }
 
-    public void convertURLStoCrawlData(File urlsFile){
-        if(!urlsFile.getName().endsWith(fileFilter.URLS_EXTENSION)) return;
+    /***
+     * Read objects from an array of 'File' from local file system into another array of 'CrawlDataFile'
+     * @Note: Ignores a 'File' that throws an exception by handling the exception in this method
+     * @param fromFiles
+     * @param toCrawlFiles
+     */
+
+    private void castFileToCrawlDataFile(File[] fromFiles, CrawlDataFile[] toCrawlFiles){
+        ObjectInputStream in = null;
+        for (int i=0; i<fromFiles.length; i++){
+            try {
+                in = new ObjectInputStream(new FileInputStream(fromFiles[i]));
+                toCrawlFiles[i] =(CrawlDataFile) in.readObject();
+            } catch (Exception e) {continue;}
+        }
         try {
-            Files.readAllLines(urlsFile.toPath());
+            if (in!=null) in.close();
         } catch (IOException e) {}
-
     }
 
+    /***
+     * Gathers 'CrawlData-s' from 'CrawDataFile-s' in a list.
+     * @return an instance of 'Iterator<CrawlData>'
+     */
     @Override
-    public CrawlData readCrawlData() throws Exception {
-        if (files==null) throw new Exception(); // TODO: 16. 10. 18 Define UserDefined Exception (CrawlDataLoadException)
-        return null;
+    public Iterator<CrawlData> iterateCrawlData(){
+        LinkedList<CrawlData> crawlDatas = new LinkedList<>();
+        for (CrawlDataFile crawlFile : this.crawlDataFiles){
+            crawlDatas.addAll(crawlFile.getListOfCrawlData());
+        }
+        return crawlDatas.iterator();
     }
 
-    public File[] reload() throws Exception {
-        if (!isValid()) throw new Exception();// TODO: 16. 10. 17 User-define Exception for failure of file load
-        files = rootDir.listFiles(fileFilter);
-        return files.clone(); //CopyOnWrite
+    /**
+     * Reload Files from Local File System.
+     * @NOTE: The returned is a clone.
+     * @return
+     * @throws Exception
+     */
+
+    public Storage reload() throws Exception {
+        CrawlDataFile[] temp =this.crawlDataFiles;
+        this.crawlDataFiles =null;
+        load();
+        if (crawlDataFiles==null){
+            this.crawlDataFiles =temp;
+            throw new Exception();
+        }
+        return this;
     }
 
     @Override
