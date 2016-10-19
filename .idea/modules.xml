@@ -2,6 +2,9 @@
 <project version="4">
   <component name="ProjectModuleManager">
     <modules>
+      <module fileurl="file://$PROJECT_DIR$/.idea/modules/MotorBikeWebSearchEngine.iml" filepath="$PROJECT_DIR$/.idea/modules/MotorBikeWebSearchEngine.iml" />
+      <module fileurl="file://$PROJECT_DIR$/.idea/modules/MotorBikeWebSearchEngine_main.iml" filepath="$PROJECT_DIR$/.idea/modules/MotorBikeWebSearchEngine_main.iml" group="MotorBikeWebSearchEngine" />
+      <module fileurl="file://$PROJECT_DIR$/.idea/modules/MotorBikeWebSearchEngine_test.iml" filepath="$PROJECT_DIR$/.idea/modules/MotorBikeWebSearchEngine_test.iml" group="MotorBikeWebSearchEngine" />
       <module fileurl="file://$PROJECT_DIR$/WebSearchEngine.iml" filepath="$PROJECT_DIR$/WebSearchEngine.iml" />
     </modules>
   </component>

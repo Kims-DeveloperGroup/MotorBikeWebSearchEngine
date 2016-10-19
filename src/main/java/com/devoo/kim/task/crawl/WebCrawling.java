@@ -1,62 +1,47 @@
 package com.devoo.kim.task.crawl;
 
 
-import com.devoo.kim.storage.data.CrawlData;
 import com.devoo.kim.storage.data.WebPage;
 import org.apache.http.Header;
-import org.apache.http.HttpResponse;
-import org.apache.http.client.HttpResponseException;
-import org.apache.http.client.ResponseHandler;
 import org.apache.http.client.methods.CloseableHttpResponse;
 import org.apache.http.client.methods.HttpGet;
 import org.apache.http.impl.client.BasicResponseHandler;
 import org.apache.http.impl.client.CloseableHttpClient;
 import org.apache.http.impl.client.HttpClients;
 
-import java.io.BufferedReader;
-import java.io.IOException;
-import java.io.InputStreamReader;
-import java.io.Reader;
-
 /**
  * Created by devoo-kim on 16. 10. 12.
  */
 // TODO: 16. 10. 15 Integrate HttpClinet(for Request and Response over Network)
 // TODO:             with jSoup for parsing html dom
-public class WebCrawling extends Crawling {
+public class WebCrawling extends Crawling<WebPage> {
+    /**Sharing HttpClient among WebCrawling instances to access**/
+    static CloseableHttpClient httpClient = HttpClients.createDefault();
+    private HttpGet httpGet;
+    private CloseableHttpResponse response;
 
-
-
-    CloseableHttpClient httpClient = HttpClients.createDefault();
-    HttpGet httpGet;
-    CloseableHttpResponse response;
-
-    WebPage page;
-    String url;
-    String content;
-    int status;
-    Header[] headers;
-
-    public WebCrawling(CrawlData crawlData) {
+    public WebCrawling(WebPage crawlData) {
         super(crawlData);
-        page = new WebPage(url);
-        System.out.println(crawlData);
     }
 
-    public WebPage getFetchItem(){
-//        WebPage page =null;// Retrieve from source list.
-        return page;
+    public WebCrawling() throws Exception {
+        super(null);
+        throw new Exception();
     }
 
     @Override
     public WebPage call() throws Exception {
-        WebPage page = getFetchItem();
+        String content;
+        int status;
+        Header[] headers;
+        
+        WebPage page = this.crawlData;
         httpGet = new HttpGet(page.urlStr);
         response = httpClient.execute(httpGet);  // TODO: Stuck and Blocked (NOT SOLVED)
         content = new BasicResponseHandler().handleResponse(response);
         status =response.getStatusLine().getStatusCode();
         headers =response.getAllHeaders();
-        System.out.println(url+" status: "+ status);
+        System.out.println(page.urlStr+" status: "+ status);//// TODO: Log URL and Status of CrawlData
         System.out.println("Content: "+ content);
         response.close();
         page.update(status, headers, content);

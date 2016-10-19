@@ -8,37 +8,46 @@ import java.util.HashMap;
 import java.util.Map;
 
 /**
- * Created by devoo-kim on 16. 10. 12.
+ * @Responsibility: This class contains of metadata of a crawled web page,
+ *                  and the response headers of the last request.
  */
 public class WebPage extends CrawlData {
-    public URL url;
-    public String urlStr;
+    public final String PROTOCOL ="http";
+    public URL url; // TODO:Make final
+    public String urlStr; // TODO:Make final
     private Map<String, WebPage> outlinks= new HashMap<>(4);// TODO: 16. 10. 18 How-To-Handle 
-    int staus;
-    Header[] haeders;
-    String body;
+    int status;
+    Header[] headers;
+    String document;
 
-    public WebPage(String url, int status, Header[] headers, String bodyContent){
-        this(url, status, bodyContent);
-        headers = headers;
+    /***CONSTRUCTOR****
+     * @param url :url of web page
+     * @param status : status code (when being crawled)
+     * @param document : HTML DOM of the page
+     * @param headers : Response 'Header-s'
+     * @throws MalformedURLException
+     */
+    public WebPage(String url, int status, String document, Header[] headers) throws MalformedURLException {
+        this(url, status, document);
+        this.headers = headers;
     }
 
-    public WebPage(String url, int status, String body){
+    public WebPage(String url, int status, String document) throws MalformedURLException {
         this(url);
-        this.staus=status;
-        this.body =body;
+        this.status =status;
+        this.document =document;
     }
 
-    public WebPage(String url){
+    public WebPage(String url) throws MalformedURLException{
         this.urlStr=url;
-        try {
-            this.url = new URL(url);
-        } catch (MalformedURLException e) {} // TODO: Handle Malformed Format of URL
+        this.url = new URL(url);
     }
 
-    public void update(int staus, Header[] headers, String body) {
+    public void update(int status, Header[] headers, String document) {
         super.update();
-        System.out.println("URL:"+urlStr+" Status:"+ staus);//// TODO: 16. 10. 15 Logging 
-        //set Value with prams
+        this.status = status;
+        this.headers =headers;
+        this.document =document;
+//      TODO: 16. 10. 15 Logging
     }
 }

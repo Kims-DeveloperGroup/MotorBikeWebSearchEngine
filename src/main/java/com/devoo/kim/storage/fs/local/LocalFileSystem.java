@@ -1,4 +1,4 @@
-package com.devoo.kim.storage.fs.hdfs;
+package com.devoo.kim.storage.fs.local;
 
 import com.devoo.kim.storage.Storage;
 import com.devoo.kim.storage.data.CrawlData;

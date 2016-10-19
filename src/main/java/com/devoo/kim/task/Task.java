@@ -1,13 +1,14 @@
 package com.devoo.kim.task;
 
-import com.devoo.kim.storage.data.CrawlData;
-
 import java.util.concurrent.Callable;
 
 /**
  * Created by devoo-kim on 16. 10. 12.
  */
-abstract public class Task<T1> implements Callable<T1>, Runnable{
+
+// TODO: 16. 10. 19 Define attributes for logs and status of Task, and common behavior
+abstract public class Task implements Callable{ 
+    public final String TASKTYPE ="Undefined";
     public static final byte NOT_IN_WORK=0;
     public static final byte STANDBY=1;
     public static final byte WORKING=2;
@@ -22,14 +23,4 @@ abstract public class Task<T1> implements Callable<T1>, Runnable{
     private int activatedTime=-1;
     private int devativatedTime=-1;
     private int throughput=-1; //Byte
-
-    @Override
-    abstract public T1 call() throws Exception;
-
-    @Override
-    public void run() {
-        try {
-            call();
-        } catch (Exception e) {}
-    }
 }

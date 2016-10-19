@@ -1,7 +1,6 @@
-package com.devoo.kim.schedule;
+package com.devoo.kim.task.crawl.schedule;
 
 import com.devoo.kim.task.Task;
-import com.devoo.kim.task.TaskGenerator;
 import com.devoo.kim.task.crawl.Crawler;
 
 import java.util.concurrent.*;
@@ -41,9 +40,9 @@ public class TaskScheduler<T1> { // TODO: Hadle Multi-Thread Issue
         Future future;
         while (true){
             try {
-                task =taskQueue.take(); /**Possibly Blocked**/
+                task =taskQueue.take(); /**Possibly Blocked(if taskQue isEmpty && )**/
                 future=executorService.submit(task);
-                submissions.put(future); /**Possibly Blocked**/
+                submissions.put(future); /**Possibly Blocked (=> Limit the number of running task)**/
                 // TODO: 16. 10. 17 Monitor Future instances in submissions whether it is complete or not. If it's complete, remove and process
                 // TODO: 16. 10. 17 Implement a module to take complete future from submission in order to make space to add.
             } catch (InterruptedException e) {
