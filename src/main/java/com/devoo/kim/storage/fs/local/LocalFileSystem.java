@@ -21,7 +21,7 @@ import java.util.LinkedList;
 public class LocalFileSystem implements Storage {
 
     private static class CrawlDataFilter implements FilenameFilter{
-        public final String CRAWL_DATA_EXTENSION =".crawl";
+        public final String CRAWL_DATA_EXTENSION = CrawlDataFile.EXTENSION;//'.crawl'
         public final String URLS_EXTENSION =".urls";
 
         @Override

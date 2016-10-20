@@ -1,9 +1,9 @@
-package com.devoo.kim.task.crawl;
+package com.devoo.kim.crawl;
 
-import com.devoo.kim.task.crawl.schedule.TaskScheduler;
 import com.devoo.kim.storage.StorageLoader;
 import com.devoo.kim.storage.data.WebPage;
 import com.devoo.kim.task.Task;
+import com.devoo.kim.crawl.schedule.TaskScheduler;
 
 import java.util.concurrent.BlockingQueue;
 import java.util.concurrent.LinkedBlockingQueue;
@@ -12,13 +12,15 @@ import java.util.concurrent.LinkedBlockingQueue;
  * Created by devoo-kim on 16. 10. 14.
  */
 public class Crawler {
-    public static final RUNNING=;
-    public static final DELAYED=;
-    public static final WAITING=;
-    public static final STOPED=;
-    public static final READY=;
-    public static final BLOCKED=;
-    public static final COMPLETE=;
+
+    public static final int NOT_INITIALLZED=0;
+    public static final int READY=1;
+    public static final int RUNNING=2;
+    public static final int WAITING=3;
+    public static final int DELAYED=4;
+    public static final int STOPED=5;
+    public static final int COMPLETE=6;
+    public static final int FAIL=7;
     String[] inputPath;
     String[] outputPath;
     StorageLoader storageLoader = new StorageLoader();

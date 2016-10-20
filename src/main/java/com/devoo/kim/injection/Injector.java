@@ -1,4 +1,4 @@
-package com.devoo.kim.task.injection;
+package com.devoo.kim.injection;
 
 import com.devoo.kim.storage.Storage;
 

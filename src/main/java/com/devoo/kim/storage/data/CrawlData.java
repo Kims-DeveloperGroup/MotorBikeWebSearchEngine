@@ -5,16 +5,18 @@ package com.devoo.kim.storage.data;
  */
 abstract public class CrawlData {
 
-    public final String PROTOCOL = "undefined";
-    final long initDate;
-    long updatedDate;
+    public long initDate;
+    public long updatedDate;
 
-    public CrawlData(){
-        initDate =System.currentTimeMillis();
-    }
 
     public void update(){
         updatedDate = System.currentTimeMillis();
     }
+
+    /**
+     * Protocol defines a type of CrawlData such as WebPage, etc,.
+     * @return the type of protocol. e.g)http, file
+     */
+    abstract public String getDataType();
 
 }

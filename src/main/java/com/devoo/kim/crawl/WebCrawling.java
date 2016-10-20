@@ -1,4 +1,4 @@
-package com.devoo.kim.task.crawl;
+package com.devoo.kim.crawl;
 
 
 import com.devoo.kim.storage.data.WebPage;
@@ -9,12 +9,15 @@ import org.apache.http.impl.client.BasicResponseHandler;
 import org.apache.http.impl.client.CloseableHttpClient;
 import org.apache.http.impl.client.HttpClients;
 
+import java.util.concurrent.atomic.AtomicInteger;
+
 /**
  * Created by devoo-kim on 16. 10. 12.
  */
 // TODO: 16. 10. 15 Integrate HttpClinet(for Request and Response over Network)
 // TODO:             with jSoup for parsing html dom
 public class WebCrawling extends Crawling<WebPage> {
+    private AtomicInteger status =new AtomicInteger(Crawler.NOT_INITIALLZED);
     /**Sharing HttpClient among WebCrawling instances to access**/
     static CloseableHttpClient httpClient = HttpClients.createDefault();
     private HttpGet httpGet;

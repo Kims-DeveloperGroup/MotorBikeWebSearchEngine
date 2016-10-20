@@ -1,7 +1,7 @@
-package com.devoo.kim.task.crawl.schedule;
+package com.devoo.kim.crawl.schedule;
 
+import com.devoo.kim.crawl.Crawler;
 import com.devoo.kim.task.Task;
-import com.devoo.kim.task.crawl.Crawler;
 
 import java.util.concurrent.*;
 import java.util.concurrent.atomic.AtomicInteger;
@@ -40,7 +40,7 @@ public class TaskScheduler<T1> { // TODO: Hadle Multi-Thread Issue
         Future future;
         while (true){
             try {
-                task =taskQueue.take(); /**Possibly Blocked(if taskQue isEmpty && )**/
+                task =taskQueue.take(); /**Blocked until the taskQueue in available. (Deadlock if taskQue isEmpty && No more being put)**/
                 future=executorService.submit(task);
                 submissions.put(future); /**Possibly Blocked (=> Limit the number of running task)**/
                 // TODO: 16. 10. 17 Monitor Future instances in submissions whether it is complete or not. If it's complete, remove and process
@@ -67,7 +67,7 @@ public class TaskScheduler<T1> { // TODO: Hadle Multi-Thread Issue
         System.out.println("Total Working Time(/sec): " + totalWorkingTime/1000+ "(sec)");// TODO: 16. 10. 15 Log
     }
 
-    public int getThreadNumber() {
+    public int getNumberOfThreads() {
         return threads;
     }
 }

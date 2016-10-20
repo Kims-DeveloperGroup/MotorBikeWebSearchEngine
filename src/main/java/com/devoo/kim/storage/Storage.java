@@ -15,9 +15,6 @@ import java.util.Iterator;
  */
 public interface Storage extends Closeable{
 
-    static final String LOCAL_FILE_PROTOCOL = "file://";
-    static final String URL_PROTOCOL ="http://";
-
     /**
      * Connect/Access to this Storage
      * @return: true if the storage is connected/accessed with valid condition.
@@ -36,7 +33,7 @@ public interface Storage extends Closeable{
      * @return Loaded data set/files
      * @throws Exception in case of failure
      */
-    public Storage load() throws Exception;
+    public Storage load() throws Exception; // TODO: 16. 10. 20 Define StorageLoadFailure Exception.
 
     /**
      * Tries to reload data/files on memory from physical storage.
@@ -44,7 +41,7 @@ public interface Storage extends Closeable{
      * @return
      * @throws Exception
      */
-    public Storage reload() throws Exception;
+    public Storage reload() throws Exception; // TODO: Define StorageLoadFailure Exception.
 
     /***
      * Iterates 'CrawlData-s' from the beginning of loaded data,

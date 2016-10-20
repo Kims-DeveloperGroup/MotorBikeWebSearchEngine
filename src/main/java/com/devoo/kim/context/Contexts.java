@@ -19,6 +19,6 @@ public final class Contexts {
     }
 
     public static Task getTask(CrawlData crawlData){
-        return (Task) TASKS.getBean(crawlData.PROTOCOL, crawlData);
+        return (Task) TASKS.getBean(crawlData.getDataType(), crawlData);
     }
 }
