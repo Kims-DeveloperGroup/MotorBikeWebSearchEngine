@@ -9,7 +9,7 @@ import com.devoo.kim.task.Task;
 public class Parser extends Task {
 
     public Parser(CrawlData crawlData) {
-        super(crawlData);
+//        super(crawlData);
     }
 
     @Override

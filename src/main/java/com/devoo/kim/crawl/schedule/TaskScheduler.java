@@ -1,6 +1,7 @@
 package com.devoo.kim.crawl.schedule;
 
 import com.devoo.kim.crawl.Crawler;
+import com.devoo.kim.crawl.event.TaskListener;
 import com.devoo.kim.task.Task;
 
 import java.util.concurrent.*;
@@ -21,19 +22,20 @@ public class TaskScheduler<T1> { // TODO: Hadle Multi-Thread Issue
     ExecutorService executorService;//// TODO: NOT Thread-Safe
     BlockingQueue<Future> submissions;
     BlockingQueue<Task> taskQueue;
-    Crawler crawler; //Caller of this
+    TaskListener taskListener;
 
-    public TaskScheduler(Crawler crawler, BlockingQueue<Task> taskQueue, int threads){        this.startTime = System.currentTimeMillis();
+    public TaskScheduler(TaskListener taskListener, BlockingQueue<Task> taskQueue, int threads){        this.startTime = System.currentTimeMillis();
         this.threads = Runtime.getRuntime().availableProcessors();
         this.executorService = Executors.newFixedThreadPool(threads);
         this.taskQueue =taskQueue;
-        this.crawler=crawler;
+        this.taskListener=taskListener;
         submissions = new LinkedBlockingQueue<>(threads+2); //// TODO: 16. 10. 17 Find out the appropriate number of tasks to be submitted.
     }
 
-    public TaskScheduler(Crawler crawler, BlockingQueue<Task> taskQueue){
-        this(crawler, taskQueue, Runtime.getRuntime().availableProcessors());
+    public TaskScheduler(TaskListener listener, BlockingQueue<Task> taskQueue){
+        this(listener, taskQueue, Runtime.getRuntime().availableProcessors());
     }
+
 
     public void submitTasks(){ /**Incomplete yet***/
         Callable task;
@@ -45,15 +47,13 @@ public class TaskScheduler<T1> { // TODO: Hadle Multi-Thread Issue
                 submissions.put(future); /**Possibly Blocked (=> Limit the number of running task)**/
                 // TODO: 16. 10. 17 Monitor Future instances in submissions whether it is complete or not. If it's complete, remove and process
                 // TODO: 16. 10. 17 Implement a module to take complete future from submission in order to make space to add.
-            } catch (InterruptedException e) {
-                e.printStackTrace();
-            }
+            } catch (InterruptedException e) {}
         }
     }
 
     public void shutdown(){
         //TODO: Terminate this and kill working thread properly.(Revised to be tested)
-        //TODO: Submissions.isEmpty() && taskQueue.isEmpty() && TaskGen.status== 'Complete/Terminate'
+        //TODO: is called when 'Submissions'.isEmpty() && taskQueue.isEmpty() && TaskGen.status== 'Complete/Terminate'
         try {
             if (!executorService.awaitTermination(10L, TimeUnit.SECONDS))
                 executorService.shutdownNow();
@@ -65,6 +65,24 @@ public class TaskScheduler<T1> { // TODO: Hadle Multi-Thread Issue
         endTime =System.currentTimeMillis();
         totalWorkingTime = endTime -startTime;
         System.out.println("Total Working Time(/sec): " + totalWorkingTime/1000+ "(sec)");// TODO: 16. 10. 15 Log
+    }
+
+    /***
+     * Check whether this 'TaskScheduler' is shutdown or not.
+     *
+     * @return true if 'TaskScheduler' is shut down.
+     */
+    public void monitorTask(){
+        Runnable runnable = new Runnable() {
+            @Override
+            public void run() {
+                /***
+                 * Monitor 'Submissions' if there exists any completed 'Future(submitted Task)'.
+                 * If it does, call listener.completeTask(Future result) and pass the result of a Task.
+                 */
+            }
+        };
+
     }
 
     public int getNumberOfThreads() {

@@ -46,6 +46,7 @@ public class Crawler {
             taskScheduler = new TaskScheduler(this, taskQueue);
             taskScheduler.submitTasks();
         } catch (Exception e) { return;}
+//        while ()
     }
 
     public static void main(String[] args){}

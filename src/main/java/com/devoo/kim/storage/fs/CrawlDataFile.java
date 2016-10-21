@@ -64,7 +64,7 @@ public class CrawlDataFile implements Serializable{ // TODO: Handle Overwrite &&
 
     /***
      *
-     * @return a clone of 'LinkedList<CrawlData>' for 'CopyOnWrite'
+     * @return a clone of 'LinkedList<CrawlData>' for 'CopyOnWrite' Todo: Think about using 'Immutable Collection' instead.
      */
     public LinkedList<CrawlData> getListOfCrawlData() {
         return (LinkedList<CrawlData>)listOfCrawlData.clone();

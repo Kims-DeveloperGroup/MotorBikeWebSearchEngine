@@ -23,9 +23,9 @@ public class WebCrawling extends Crawling<WebPage> {
     private HttpGet httpGet;
     private CloseableHttpResponse response;
 
-    public WebCrawling(WebPage crawlData) {
-        super(crawlData);
-    }
+//    public WebCrawling(WebPage crawlData) {
+//        super(crawlData);// TODO: 16. 10. 21 Required to fix
+//    }
 
     public WebCrawling() throws Exception {
         super(null);
