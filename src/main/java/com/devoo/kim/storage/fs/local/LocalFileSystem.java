@@ -39,10 +39,6 @@ public class LocalFileSystem implements Storage {
             throw new Exception();
         }
     }
-    
-    public LocalFileSystem() throws Exception {
-        throw new Exception(); // TODO: 16. 10. 17 Define user-defined Exception. 
-    }
 
     @Override
     public boolean connect() {
@@ -50,6 +46,10 @@ public class LocalFileSystem implements Storage {
         return true;
     }
 
+    /**
+     * Check if the 'Storage' is valid or invalid.
+     * @return true if the 'Storage' is valid.
+     */
     @Override
     public boolean isValid() {
         return (rootDir.exists()&& rootDir.isDirectory() &&
@@ -63,7 +63,6 @@ public class LocalFileSystem implements Storage {
      * @return
      * @throws Exception
      */
-
     @Override
     public Storage load() throws Exception {
         if (!isValid()) throw new Exception();
@@ -76,13 +75,12 @@ public class LocalFileSystem implements Storage {
         return this;
     }
 
-    /***
+    /**
      * Read objects from an array of 'File' from local file system into another array of 'CrawlDataFile'
      * @Note: Ignores a 'File' that throws an exception by handling the exception in this method
      * @param fromFiles
      * @param toCrawlFiles
      */
-
     private void castFileToCrawlDataFile(File[] fromFiles, CrawlDataFile[] toCrawlFiles){
         ObjectInputStream in = null;
         for (int i=0; i<fromFiles.length; i++){
@@ -101,9 +99,10 @@ public class LocalFileSystem implements Storage {
      * @return an instance of 'Iterator<CrawlData>'
      */
     @Override
-    public Iterator<CrawlData> iterateCrawlData(){
+    public Iterator<CrawlData> iterateCrawlData(){ // TODO: Extract the method into independent interface.
         LinkedList<CrawlData> crawlDatas = new LinkedList<>();
         for (CrawlDataFile crawlFile : this.crawlDataFiles){
+            if (!crawlFile.isValid()) continue; // TODO: Is it required to be called ? 
             crawlDatas.addAll(crawlFile.getListOfCrawlData());
         }
         return crawlDatas.iterator();

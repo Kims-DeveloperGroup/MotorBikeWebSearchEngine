@@ -1,65 +1,102 @@
 package com.devoo.kim.storage.fs;
 
 import com.devoo.kim.storage.data.CrawlData;
+import com.devoo.kim.storage.data.WebPage;
 
 import java.io.*;
 import java.nio.file.Files;
 import java.nio.file.Path;
 import java.nio.file.Paths;
-import java.util.Iterator;
-import java.util.LinkedList;
-import java.util.List;
+import java.util.*;
 
 /**
- * @NOTE: CopyOnWrite Operation is employed.
+ * @NOTE:
+ * 1. CopyOnWrite Operation is employed when providing list of 'CrawlData' in the file.
+ * 2. On written, the file cannot be modified(Read-only).
  */
-public class CrawlDataFile implements Serializable{ // TODO: Handle Overwrite && Update Operation. 
+public class CrawlDataFile implements Serializable{
 
 
     public static final String EXTENSION =".crawl";
-    File file;
-    String pathStr;
+    public static final String EXTENSION_URL =".url";
+    private boolean written =false;
+    private File file;
+    private String absolutePath;
     private LinkedList<CrawlData> listOfCrawlData = new LinkedList<>();
-    transient Path path;
 
 
     public CrawlDataFile(Path path) throws Exception {
         this(path.toString());
     }
 
-    public CrawlDataFile(String pathname) throws Exception {
-        if (!pathname.toLowerCase().endsWith(EXTENSION)) this.pathStr =pathname+EXTENSION;
-        this.path=Paths.get(this.pathStr);
-        this.file = path.toFile();
+    public CrawlDataFile(String pathStr) throws Exception {
+        if (!pathStr.toLowerCase().endsWith(EXTENSION)
+                || !pathStr.toLowerCase().endsWith(EXTENSION_URL)) throw new Exception();
+
+        this.file = new File(pathStr).getAbsoluteFile();
+        this.absolutePath =pathStr;
+        if (pathStr.endsWith(EXTENSION_URL)){
+            //Read Lines of urls written in the file.
+            List<String> urls =Files.readAllLines(Paths.get(absolutePath));
+            //Instantiates CrawlData with list of urls.
+            convertUrlToCrawlData(urls);
+            //Create a New 'CrawlDataFile'
+            String newPathStr = Paths.get(absolutePath).getParent().toString()+EXTENSION;
+            //Set the path of newly created 'CrawlDataFile(this)' and Create a File('.crawl').
+            file = new File(newPathStr).getAbsoluteFile();
+            absolutePath = file.getAbsolutePath();
+            createNewFile();
+        }
     }
 
     /**
-     *
-     * @return a clone of 'Iterator<CrawlData>' for 'CopyOnWrite'
+     * Only called in Constructor
+     * @throws Exception if the 'CrawlDataFile' is not new, and has been written already.
      */
-
-    public Iterator<CrawlData> iterateCrawlData(){
-        LinkedList<CrawlData> clone = (LinkedList<CrawlData>) listOfCrawlData.clone();
-        return clone.iterator();
+    private void convertUrlToCrawlData(Collection<String> urls) throws Exception {
+        if (this.written) throw  new Exception();
+        for (String url : urls){
+            add(new WebPage(url));
+        }
+        this.written =true;
     }
 
-    public void add(CrawlData crawlData){
+    /***
+     * Creates a new file in a given path and write data of 'CrawlDataFile'
+     * it throws exception if
+     * @throws IOException
+     */
+    public void createNewFile() throws IOException {
+        if (this.written) throw new IOException();
+        if (file.createNewFile()){
+            ObjectOutputStream out = new ObjectOutputStream(new FileOutputStream(file));
+            out.writeObject(this);
+            file.setReadOnly();
+            written =true;
+        }
+    }
+
+    /**
+     * Add a unit of 'CrawlData' into newly created 'CrawlDataFile'.
+     * If the 'CrawlDataFile' has been already written before, it throws an exception.
+     * @NOTE: Addtition is only allowed to a new 'CrawlDataFile'.
+     *
+     * @param crawlData
+     * @throws Exception
+     */
+    public void add(CrawlData crawlData) throws Exception {
+        if (written) throw new Exception();
         listOfCrawlData.add(crawlData);
     }
 
-    private void loadFile() throws IOException, ClassNotFoundException {
-        CrawlDataFile instance;
-        ObjectInputStream in = new ObjectInputStream(new FileInputStream(file));
-        instance =(CrawlDataFile)in.readObject();
-        this.listOfCrawlData =instance.getListOfCrawlData();
-        in.close();
+    public void add(Collection<? extends CrawlData> crawlData) throws Exception {
+        if (written) throw new Exception();
+        listOfCrawlData.addAll(crawlData);
     }
 
-    // TODO: 16. 10. 19 Whether to overwrite or not is flaged here.
-    public void createNewFile(boolean overwrite) throws IOException {
-        if (overwrite &&file.exists()) Files.delete(this.path);
-        ObjectOutputStream out = new ObjectOutputStream(new FileOutputStream(file));
-        out.writeObject(this);
+    public boolean isValid(){
+        if (!this.file.exists() || !file.canRead()) return false;
+        return true;
     }
 
     /***

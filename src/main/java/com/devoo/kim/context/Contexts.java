@@ -1,5 +1,6 @@
 package com.devoo.kim.context;
 
+import com.devoo.kim.crawl.Crawling;
 import com.devoo.kim.storage.Storage;
 import com.devoo.kim.storage.data.CrawlData;
 import com.devoo.kim.task.Task;
@@ -18,7 +19,7 @@ public final class Contexts {
         return (Storage) STORAGES.getBean(scheme, path);
     }
 
-    public static Task getTask(CrawlData crawlData){
-        return (Task) TASKS.getBean(crawlData.getDataType(), crawlData);
+    public static Crawling getCrawlingTask(CrawlData crawlData){
+        return (Crawling) TASKS.getBean(crawlData.getDataType(), crawlData);
     }
 }

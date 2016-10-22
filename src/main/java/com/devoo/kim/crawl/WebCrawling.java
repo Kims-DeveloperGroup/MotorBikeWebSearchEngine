@@ -33,7 +33,7 @@ public class WebCrawling extends Crawling<WebPage> {
     }
 
     @Override
-    public WebPage call() throws Exception {
+    public WebPage call() throws Exception { // TODO: 16. 10. 22 Add Time-out function to be cancelled. 
         String content;
         int status;
         Header[] headers;

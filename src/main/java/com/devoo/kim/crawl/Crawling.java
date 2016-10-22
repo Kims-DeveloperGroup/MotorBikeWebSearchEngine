@@ -9,7 +9,7 @@ import java.util.concurrent.atomic.AtomicInteger;
  * Created by devoo-kim on 16. 10. 12.
  */
 abstract public class Crawling <SubTypeOfCrawlData extends CrawlData> extends Task {
-    private AtomicInteger status =new AtomicInteger(Crawler.NOT_INITIALLZED); // TODO: 16. 10. 20 Find out whether 'AtomicInterger' is appropriate to guarantee a consistent monitor of status for TaskGenerator.
+    private AtomicInteger status =new AtomicInteger(Crawler.NOT_INITIALLZED); // TODO: 16. 10. 20 Find out whether 'AtomicInterger' is appropriate to guarantee a consistent monitor of status for CrawlingGenerator.
     /**NOTE: final does not guarantee consistency of attr in 'CrawlData'**/
     public final SubTypeOfCrawlData crawlData; // TODO: 16. 10. 21 Required to fix CrawlData is better to be managed in sub-class.
 
@@ -25,7 +25,7 @@ abstract public class Crawling <SubTypeOfCrawlData extends CrawlData> extends Ta
 
     /***
      * By calling this method, outside objects monitor the status of this.
-     * @return the current status of this 'TaskGenerator'
+     * @return the current status of this 'CrawlingGenerator'
      */
 
     public AtomicInteger getStatus(){
