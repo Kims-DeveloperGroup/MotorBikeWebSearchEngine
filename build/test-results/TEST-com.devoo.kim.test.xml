@@ -1,0 +1,7 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<testsuite name="com.devoo.kim.test" tests="1" skipped="0" failures="0" errors="0" timestamp="2016-10-21T14:29:36" hostname="devookim-GL62-6QF" time="0.002">
+  <properties/>
+  <testcase name="testJunit" classname="com.devoo.kim.test" time="0.002"/>
+  <system-out><![CDATA[]]></system-out>
+  <system-err><![CDATA[]]></system-err>
+</testsuite>
