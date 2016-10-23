@@ -14,12 +14,12 @@ public final class Contexts {
 
     //// TODO:  /** Make Consistent API of SpringContainer **/
     public static final ApplicationContext STORAGES = new ClassPathXmlApplicationContext("contexts/storageBeans.xml");
-    public static final ApplicationContext TASKS = new ClassPathXmlApplicationContext("contexts/taskBeans.xml");
-    public static Storage getStorageBean(String scheme, String path){
+    public static final ApplicationContext TASKS = new ClassPathXmlApplicationContext("contexts/crawlingBeans.xml");
+    public static Storage generateStorage(String scheme, String path){
         return (Storage) STORAGES.getBean(scheme, path);
     }
 
-    public static Crawling getCrawlingTask(CrawlData crawlData){
+    public static Crawling generateCrawling(CrawlData crawlData){
         return (Crawling) TASKS.getBean(crawlData.getDataType(), crawlData);
     }
 }

@@ -40,12 +40,15 @@ public class CrawlingGenerator extends Thread {// TODO: Handle Multi-Thread Issu
         this.status.set(Crawler.READY);/**#READY**/
     }
 
+
+
     /***
      * Generates 'CrawlingTask-s' and enqueue them into 'TaskQueue'. 'CrawlingScheduler' will take 'Crawling' tasks from 'crawlingQueue' and will run tasks.
      * The inputs of Tasks, 'CrawlData-s' are loaded from Storage, which possibly causes delay to load data/files from physical storage.
      */
+
     @Override
-    public void run() {
+    public synchronized void start() {
         String key;
         Storage storage;
         Iterator<CrawlData> iterator;// iteration 'CrawlData-s' from a loaded 'Storage'
@@ -64,7 +67,7 @@ public class CrawlingGenerator extends Thread {// TODO: Handle Multi-Thread Issu
                 while (iterator.hasNext()){
                     this.status.set(Crawler.RUNNING); /**#RUNNING**/
                     crawlData= iterator.next();
-                    crawlTask =Contexts.getCrawlingTask(crawlData);
+                    crawlTask =Contexts.generateCrawling(crawlData);
                     this.status.set(Crawler.WAITING);
                     crawlingQueue.put(crawlTask);/**#WAITING (Being blocked until crawlingQueue is available to put).
                      Possibly Deadlock (crawlingQueue is being taken && crawlingQueue)**/

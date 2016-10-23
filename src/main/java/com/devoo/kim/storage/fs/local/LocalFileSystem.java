@@ -33,11 +33,15 @@ public class LocalFileSystem implements Storage {
     File rootDir;
     CrawlDataFile[] crawlDataFiles;
     private static CrawlDataFilter fileFilter = new CrawlDataFilter();
+
     public LocalFileSystem(String path) throws Exception {
         rootDir = new  File(path);
         if(!isValid()){
             throw new Exception();
         }
+    }
+    public LocalFileSystem() throws Exception {
+        throw new UnsupportedOperationException();
     }
 
     @Override
@@ -128,4 +132,12 @@ public class LocalFileSystem implements Storage {
 
     @Override
     public void close() throws IOException {}
+
+    public static void main(String[] args){
+        try {
+            LocalFileSystem localFileSystem = new LocalFileSystem();
+        } catch (Exception e) {
+            e.printStackTrace();
+        }
+    }
 }

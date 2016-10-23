@@ -2,10 +2,12 @@ package com.devoo.kim.crawl.schedule;
 
 import com.devoo.kim.crawl.Crawling;
 import com.devoo.kim.crawl.CrawlingGenerator;
-import com.devoo.kim.crawl.event.TaskListener;
+import com.devoo.kim.task.AsyncTaskWatcher;
+import com.devoo.kim.task.listener.TaskListener;
 import com.devoo.kim.storage.data.CrawlData;
 import com.devoo.kim.task.Task;
 
+import java.util.Collection;
 import java.util.concurrent.*;
 import java.util.concurrent.atomic.AtomicInteger;
 
@@ -23,6 +25,7 @@ public class CrawlingScheduler<T1> { // TODO: Handle Multi-Thread Issue
     private long timeout;
     ExecutorService executorService;//// TODO: NOT Thread-Safe(?)
     BlockingQueue<Future<CrawlData>> submissions;
+    AsyncTaskWatcher taskWatcher;
     CrawlingGenerator crawlingGenerator;
     BlockingQueue<Crawling> crawlingQueue;
     TaskListener taskListener;
@@ -50,7 +53,8 @@ public class CrawlingScheduler<T1> { // TODO: Handle Multi-Thread Issue
         Task task;
         Future<CrawlData> future;
         if (!crawlingGenerator.isAlive()) crawlingGenerator.start();
-        monitorCrawlings();
+//        monitorCrawlings();
+        taskWatcher = new AsyncTaskWatcher(submissions, taskListener); // TODO: 16. 10. 24 Fix it. 
         while (crawlingGenerator.isAlive() || !crawlingQueue.isEmpty()){
             try {
                 task = crawlingQueue.take(); /**Blocked until the crawlingQueue in available. (Deadlock if taskQue isEmpty && No more being put)**/
@@ -85,38 +89,7 @@ public class CrawlingScheduler<T1> { // TODO: Handle Multi-Thread Issue
      * Monitor 'Submissions' if there exists any completed 'Future(submitted Task)'.
      * If it does, call listener.completeTask(Future result) and pass the result of a Task.
      */
-    private void monitorCrawlings(){
-        Runnable polling = new Runnable() {
-            @Override
-            public void run() {
 
-                while(crawlingGenerator.isAlive() || !submissions.isEmpty()){// TODO: Think about what if any of them is true, but executorService is terminated.
-                        if (submissions.isEmpty()) {
-                            try {
-                                Thread.sleep(1000L);
-                            } catch (InterruptedException e) {
-                                continue;
-                            }
-                            submissions.forEach(future -> {
-                                try {
-                                    if (future.isDone()) {
-                                        taskListener.completeTask(future.get(1, TimeUnit.SECONDS));
-                                        submissions.remove(future);
-
-                                    } else if (future.isCancelled()) submissions.remove(future);
-
-                                } catch (Exception e) {
-
-                                }
-                            });
-                        }
-                }
-            }
-        };
-        Thread pollingThread = new Thread(polling);
-        pollingThread.setName("Polling 'Future-s' of 'Crawling'.");
-        pollingThread.start();
-    }
     public int getNumberOfThreads() {
         return threads;
     }

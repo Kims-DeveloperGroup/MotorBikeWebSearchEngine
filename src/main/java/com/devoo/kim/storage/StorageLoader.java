@@ -43,7 +43,7 @@ public class StorageLoader {
             try{
                 uri =new URI(path);
                 if (!uri.isAbsolute()) throw new Exception();
-                storages.putIfAbsent(path, Contexts.getStorageBean(uri.getScheme(), path));
+                storages.putIfAbsent(path, Contexts.generateStorage(uri.getScheme(), path));
             }catch (URISyntaxException e){
                 isInitialized=false;
                 storages=null;
