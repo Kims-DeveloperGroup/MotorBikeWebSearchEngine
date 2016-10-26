@@ -1,11 +1,9 @@
 package com.devoo.kim.storage;
 
 import com.devoo.kim.storage.data.CrawlData;
-import com.devoo.kim.storage.fs.CrawlDataFile;
+import com.devoo.kim.storage.exception.InvaildStorageException;
 
 import java.io.Closeable;
-import java.io.File;
-import java.io.FileReader;
 import java.util.Iterator;
 
 /**
@@ -13,13 +11,13 @@ import java.util.Iterator;
  *
  * @Behavior: This interface is not a concrete, but offers interface to implement concrete behaviors.
  */
-public interface Storage extends Closeable{
+public interface Storage<T1> extends Closeable{
 
     /**
      * Connect/Access to this Storage
      * @return: true if the storage is connected/accessed with valid condition.
      */
-    public boolean connect();
+    public boolean connect(String path) throws InvaildStorageException;
     /**
      *
      * @return true if the storage has valid condition. Otherwise, false.
@@ -33,7 +31,7 @@ public interface Storage extends Closeable{
      * @return Loaded data set/files
      * @throws Exception in case of failure
      */
-    public Storage load() throws Exception; // TODO: 16. 10. 20 Define StorageLoadFailure Exception.
+    public void load(String path) throws Exception; // TODO: 16. 10. 20 Define StorageLoadFailure Exception.
 
     /**
      * Tries to reload data/files on memory from physical storage.
@@ -41,7 +39,7 @@ public interface Storage extends Closeable{
      * @return
      * @throws Exception
      */
-    public Storage reload() throws Exception; // TODO: Define StorageLoadFailure Exception.
+    public void reload() throws Exception; // TODO: Define StorageLoadFailure Exception.
 
     /***
      * Iterates 'CrawlData-s' from the beginning of loaded data,
@@ -50,4 +48,7 @@ public interface Storage extends Closeable{
      */
     public Iterator<CrawlData> iterateCrawlData();
     // TODO: 16. 10. 17 Think how to implement close();
+
+    public T1  getRoot();
+
 }

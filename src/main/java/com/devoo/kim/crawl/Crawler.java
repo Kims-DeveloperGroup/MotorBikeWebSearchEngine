@@ -34,7 +34,7 @@ public class Crawler implements TaskListener<CrawlData>{
     public static final int FAIL=7;
     String[] inputPath;
     String outputPath;
-    StorageLoader storageLoader = new StorageLoader();
+    StorageLoader storageLoader;
     int statusofLoader;
     CrawlingScheduler<WebPage> crawlingScheduler;
     int statusOfScheduler;
@@ -51,16 +51,19 @@ public class Crawler implements TaskListener<CrawlData>{
     public Crawler(String[] inputPath, String outputPath){
         this.inputPath = inputPath;
         this.outputPath= outputPath;
-        // TODO: Required to Set Cofiguration of Crawler and Crawling CrawlingGenerator
+        // TODO: Required to Set Configuration of Crawler and Crawling CrawlingGenerator
     }
 
     public void run(){
         try {
-            storageLoader.initialize(inputPath);
+            storageLoader = StorageLoader.initialize(inputPath);
             crawlingGenerator = new CrawlingGenerator(storageLoader.getStorages());
             crawlingGenerator.start();
             crawlingScheduler = new CrawlingScheduler(this, crawlingGenerator);
             crawlingScheduler.submitTasks();
+                // TODO: Re-create CrawlingGen & CrawlingScheduler if they are not alive.
+                // TODO: Find exit a exit point of loop if CrawlGen is not alive and CrawlingScheduler is terminated.
+                // TODO: if CrawlGen is alive and CrawlingScheduler is terminated, restart it.
         } catch (Exception e) { return;}
     }
 

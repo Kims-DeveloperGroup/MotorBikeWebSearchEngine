@@ -1,7 +1,9 @@
 package com.devoo.kim.storage;
 
 import com.devoo.kim.context.Contexts;
-import org.springframework.context.ApplicationContext;
+import com.devoo.kim.storage.exception.InvaildStorageException;
+import com.devoo.kim.storage.exception.InvalidStorageLoaderException;
+import com.devoo.kim.storage.exception.LoaderInitializationFailureExcepation;
 
 import java.net.URI;
 import java.net.URISyntaxException;
@@ -18,39 +20,45 @@ import java.util.HashMap;
 /**@Thread-safe*/
 public class StorageLoader {
     long initTime;
-    private boolean isInitialized =false;
-    private HashMap<String, Storage> storages;/**@Must:Immutable*/
+    private boolean isInitialized=false;
+    private HashMap<String, Storage> storages; /**@Must:Immutable*/
 
-    public HashMap<String, Storage> getStorages() throws Exception {
-        if (!isInitialized) throw new Exception();// TODO: 16. 10. 17 Define Custom InitializedException to prevent change.
-        return storages;
+    private StorageLoader(HashMap<String, Storage> storages) throws LoaderInitializationFailureExcepation {
+        if (isInitialized) throw new LoaderInitializationFailureExcepation(); // TODO: 16. 10. 17 Define Custom InitializedException to prevent change.
+        this.storages = storages;
+        isInitialized= true;
+        initTime=System.currentTimeMillis();
     }
 
     /**
-     * Initializes this 'StorageLoader' by loading 'Storage-s' with given paths.
+     * Initializes this 'StorageLoader' by connecting 'Storage-s' with given paths.
      * Once this is called, the same 'StorageLoader' is not allowed to call this twice.
-     * @param paths : paths of storage to access (MUST: Absolute path with scheme/protocol)
-     * @throws Exception
+     * @param paths : paths of storage to be loaded.
+     * @return an instance of 'StorageLoader' if any of 'Storage-s' are added and ready to load 'CrawlData-s'/'CrawlDataFile-s'
      */
-
-    public void initialize(String... paths) throws Exception {// TODO: 16. 10. 17 Not Nomalize uri yet. 
-        if (isInitialized) throw new Exception(); // TODO: 16. 10. 17 Define Custom InitializedException to prevent change. 
-        isInitialized= true;
-        initTime=System.currentTimeMillis();
-        ApplicationContext context =Contexts.STORAGES;
+    public static StorageLoader initialize(String... paths) throws LoaderInitializationFailureExcepation {// TODO: 16. 10. 17 Not Nomalize uri yet.
+        StorageLoader loader;
         URI uri;
+        HashMap<String, Storage> tempStorages =new HashMap<>();
+        Storage storage;
+
         for (String path: paths){
             try{
                 uri =new URI(path);
-                if (!uri.isAbsolute()) throw new Exception();
-                storages.putIfAbsent(path, Contexts.generateStorage(uri.getScheme(), path));
-            }catch (URISyntaxException e){
-                isInitialized=false;
-                storages=null;
-                throw new Exception(); // TODO: 16. 10. 17 Define Initialization Failuer Exception.
-            }
-            // TODO: 16. 10. 17 Log metadata of Storage Instances.
+                storage= Contexts.generateStorageConnection(uri.getScheme(), path);
+                tempStorages.putIfAbsent(path, storage);
+                // TODO: 16. 10. 17 Log metadata of Storage Instances.
+            }catch (URISyntaxException e) {continue;}
+            catch (InvaildStorageException e) {continue;}
         }
+        if (tempStorages.isEmpty()) new LoaderInitializationFailureExcepation();
+        loader = new StorageLoader(tempStorages);
+        return loader;
+    }
+
+    public HashMap<String, Storage> getStorages() throws InvalidStorageLoaderException {
+        if (!isInitialized) throw new InvalidStorageLoaderException();
+        return this.storages;
     }
 
     @Override

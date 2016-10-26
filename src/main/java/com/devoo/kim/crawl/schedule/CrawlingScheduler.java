@@ -7,6 +7,7 @@ import com.devoo.kim.task.listener.TaskListener;
 import com.devoo.kim.storage.data.CrawlData;
 import com.devoo.kim.task.Task;
 
+import java.lang.ref.WeakReference;
 import java.util.Collection;
 import java.util.concurrent.*;
 import java.util.concurrent.atomic.AtomicInteger;
@@ -24,7 +25,7 @@ public class CrawlingScheduler<T1> { // TODO: Handle Multi-Thread Issue
     private long endTime;
     private long timeout;
     ExecutorService executorService;//// TODO: NOT Thread-Safe(?)
-    BlockingQueue<Future<CrawlData>> submissions;
+    WeakReference<AsyncTaskWatcher> weakTaskWatcher;
     AsyncTaskWatcher taskWatcher;
     CrawlingGenerator crawlingGenerator;
     BlockingQueue<Crawling> crawlingQueue;
@@ -36,7 +37,7 @@ public class CrawlingScheduler<T1> { // TODO: Handle Multi-Thread Issue
         this.executorService = Executors.newFixedThreadPool(threads);
         this.crawlingQueue = crawlingQueue;
         this.taskListener=taskListener;
-        submissions = new LinkedBlockingQueue<>(threads+2); //// TODO: 16. 10. 17 Find out the appropriate number of tasks to be submitted.
+        taskWatcher = new AsyncTaskWatcher(taskListener, this.threads);// TODO: 16. 10. 17 Find out the appropriate number of tasks to be submitted.
     }
 
     public CrawlingScheduler(TaskListener listener, BlockingQueue<Crawling> crawlingQueue){
@@ -48,20 +49,24 @@ public class CrawlingScheduler<T1> { // TODO: Handle Multi-Thread Issue
         this.crawlingGenerator =crawlingGenerator;
     }
 
-
-    public void submitTasks(){ /**Incomplete yet***/
+    public void submitTasks(){
         Task task;
         Future<CrawlData> future;
         if (!crawlingGenerator.isAlive()) crawlingGenerator.start();
-//        monitorCrawlings();
-        taskWatcher = new AsyncTaskWatcher(submissions, taskListener); // TODO: 16. 10. 24 Fix it. 
+        taskWatcher.start();
         while (crawlingGenerator.isAlive() || !crawlingQueue.isEmpty()){
             try {
+                if (!taskWatcher.isAlive()){ //To restart watcher when it is died.
+                    taskWatcher=new AsyncTaskWatcher(taskListener,threads);
+                    weakTaskWatcher= new WeakReference(taskWatcher);
+                }
+                if (crawlingQueue.isEmpty() && !crawlingGenerator.isAlive()) break;
                 task = crawlingQueue.take(); /**Blocked until the crawlingQueue in available. (Deadlock if taskQue isEmpty && No more being put)**/
                 future=executorService.submit(task);
-                submissions.put(future); /**Possibly Blocked (=> Limit the number of running task)**/
+                taskWatcher.put(future); /**Possibly Blocked (=> Limit the number of running task)**/
             } catch (InterruptedException e) {}
         }
+        shutdown();
     }
 
     /***

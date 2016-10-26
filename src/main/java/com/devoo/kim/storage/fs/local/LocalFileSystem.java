@@ -2,6 +2,8 @@ package com.devoo.kim.storage.fs.local;
 
 import com.devoo.kim.storage.Storage;
 import com.devoo.kim.storage.data.CrawlData;
+import com.devoo.kim.storage.exception.InvaildStorageException;
+import com.devoo.kim.storage.exception.StorageLoadException;
 import com.devoo.kim.storage.fs.CrawlDataFile;
 
 import java.io.*;
@@ -18,7 +20,7 @@ import java.util.LinkedList;
  *        too large size or too many of 'CrawlData-s' may cause 'OutOfMemoryError', or long blocking time(Delay).
  *        Also that could reduce performance of the application.
  */
-public class LocalFileSystem implements Storage {
+public class LocalFileSystem implements Storage<File> {
 
     private static class CrawlDataFilter implements FilenameFilter{
         public final String CRAWL_DATA_EXTENSION = CrawlDataFile.EXTENSION;//'.crawl'
@@ -29,24 +31,16 @@ public class LocalFileSystem implements Storage {
             return name.toLowerCase().endsWith(CRAWL_DATA_EXTENSION) ||name.toLowerCase().endsWith(URLS_EXTENSION);
         }
     }
-
-    File rootDir;
-    CrawlDataFile[] crawlDataFiles;
     private static CrawlDataFilter fileFilter = new CrawlDataFilter();
 
-    public LocalFileSystem(String path) throws Exception {
-        rootDir = new  File(path);
-        if(!isValid()){
-            throw new Exception();
-        }
-    }
-    public LocalFileSystem() throws Exception {
-        throw new UnsupportedOperationException();
-    }
+    private File rootDir;
+    CrawlDataFile[] crawlDataFiles;
+    boolean loaded =false;
 
     @Override
-    public boolean connect() {
-        if (!isValid()) return false;
+    public boolean connect(String path) throws InvaildStorageException {
+        rootDir= new File(path);
+        if (!isValid()) throw new InvaildStorageException();
         return true;
     }
 
@@ -56,27 +50,47 @@ public class LocalFileSystem implements Storage {
      */
     @Override
     public boolean isValid() {
-        return (rootDir.exists()&& rootDir.isDirectory() &&
-                rootDir.canExecute() && rootDir.canRead());
+        return (rootDir.exists()&& rootDir.isDirectory() && rootDir.canRead());
     }
 
     /**
      * Load 'File-s' with '.crawl' extension and Store them in a type of 'CrawlDataFile'.
-     * if 'CrawlDataFile-s' have been loaded, the previously loaded are returned.
-     * @NOTE: The returned is a clone.
-     * @return
-     * @throws Exception
+     * if 'CrawlDataFile-s' have been loaded, nothing is loaded.
+     * @throws InvaildStorageException  when the path is an invalid storage.
      */
     @Override
-    public Storage load() throws Exception {
-        if (!isValid()) throw new Exception();
+    public void load(String path) throws InvaildStorageException {
+        if (loaded) return;
+        rootDir = new File(path);
+        if (!isValid()) throw new InvaildStorageException();
         File[] files;
         if (this.crawlDataFiles ==null){
             files =rootDir.listFiles(fileFilter);
             this.crawlDataFiles = new CrawlDataFile[crawlDataFiles.length];
             castFileToCrawlDataFile(files, this.crawlDataFiles);
         }
-        return this;
+    }
+
+    public void load(File rootDir) throws InvaildStorageException {
+        load(rootDir.getPath());
+    }
+
+    /**
+     * Reload Files from Local File System.
+     * if it had not been loaded before, an exception is thrown.
+     * @throws StorageLoadException
+     */
+
+    public void reload() throws StorageLoadException {
+        CrawlDataFile[] temp =this.crawlDataFiles;
+        this.loaded = false;
+
+        try {
+            load(rootDir);
+        } catch (InvaildStorageException e) {
+            this.crawlDataFiles =temp;
+            throw new StorageLoadException();
+        }
     }
 
     /**
@@ -112,32 +126,13 @@ public class LocalFileSystem implements Storage {
         return crawlDatas.iterator();
     }
 
-    /**
-     * Reload Files from Local File System.
-     * @NOTE: The returned is a clone.
-     * @return
-     * @throws Exception
-     */
-
-    public Storage reload() throws Exception {
-        CrawlDataFile[] temp =this.crawlDataFiles;
-        this.crawlDataFiles =null;
-        load();
-        if (crawlDataFiles==null){
-            this.crawlDataFiles =temp;
-            throw new Exception();
-        }
-        return this;
+    @Override
+    public File getRoot() {
+        return rootDir;
     }
 
     @Override
     public void close() throws IOException {}
 
-    public static void main(String[] args){
-        try {
-            LocalFileSystem localFileSystem = new LocalFileSystem();
-        } catch (Exception e) {
-            e.printStackTrace();
-        }
-    }
+    public static void main(String[] args){}
 }
