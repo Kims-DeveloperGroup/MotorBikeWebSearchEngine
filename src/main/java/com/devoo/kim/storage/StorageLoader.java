@@ -20,6 +20,7 @@ import java.util.HashMap;
 /**@Thread-safe*/
 public class StorageLoader {
     long initTime;
+    public final int storageCount;
     private boolean isInitialized=false;
     private HashMap<String, Storage> storages; /**@Must:Immutable*/
 
@@ -28,6 +29,7 @@ public class StorageLoader {
         this.storages = storages;
         isInitialized= true;
         initTime=System.currentTimeMillis();
+        storageCount=storages.size();
     }
 
     /**
