@@ -5,17 +5,22 @@ import com.devoo.kim.storage.data.CrawlData;
 import com.devoo.kim.storage.exception.InvaildStorageException;
 import com.devoo.kim.storage.exception.StorageLoadException;
 import com.devoo.kim.storage.fs.CrawlDataFile;
+import com.devoo.kim.storage.fs.exception.CrawlDataFileException;
+import com.devoo.kim.storage.fs.exception.InvalidCrawlDataFileException;
 
 import java.io.*;
+import java.nio.file.Files;
+import java.nio.file.Paths;
 import java.util.Iterator;
 import java.util.LinkedList;
+import java.util.List;
 
 /**
  * LocalFileSystem implements Storage<File[]>
  *
- *@Responsibility: An abstraction of Local File System loaded on memory
- *
+ * @Responsibility: An abstraction of Local File System loaded on memory
  * @Behavior: This class offers an access to Local File System, which contains crawlDataFiles of 'CrawlData-s'
+ * @Instantiation: By calling constructor and 'public boolean connect()' todo: inconsistent instantiation: find a better way.
  * @NOTE: When loading 'CrawlDataFile-s' from File System to generate 'CrawlData-s',
  *        too large size or too many of 'CrawlData-s' may cause 'OutOfMemoryError', or long blocking time(Delay).
  *        Also that could reduce performance of the application.
@@ -24,7 +29,7 @@ public class LocalFileSystem implements Storage<File> {
 
     private static class CrawlDataFilter implements FilenameFilter{
         public final String CRAWL_DATA_EXTENSION = CrawlDataFile.EXTENSION;//'.crawl'
-        public final String URLS_EXTENSION =".urls";
+        public final String URLS_EXTENSION =".url";
 
         @Override
         public boolean accept(File dir, String name) {
@@ -59,20 +64,14 @@ public class LocalFileSystem implements Storage<File> {
      * @throws InvaildStorageException  when the path is an invalid storage.
      */
     @Override
-    public void load(String path) throws InvaildStorageException {
-        if (loaded) return;
-        rootDir = new File(path);
+    public void load() throws InvaildStorageException {
         if (!isValid()) throw new InvaildStorageException();
         File[] files;
         if (this.crawlDataFiles ==null){
             files =rootDir.listFiles(fileFilter);
-            this.crawlDataFiles = new CrawlDataFile[crawlDataFiles.length];
-            castFileToCrawlDataFile(files, this.crawlDataFiles);
+            this.crawlDataFiles = new CrawlDataFile[files.length];
+            readCrawlDataFiles(files, this.crawlDataFiles);
         }
-    }
-
-    public void load(File rootDir) throws InvaildStorageException {
-        load(rootDir.getPath());
     }
 
     /**
@@ -86,11 +85,12 @@ public class LocalFileSystem implements Storage<File> {
         this.loaded = false;
 
         try {
-            load(rootDir);
+            load();
         } catch (InvaildStorageException e) {
             this.crawlDataFiles =temp;
             throw new StorageLoadException();
         }
+        this.loaded =true;
     }
 
     /**
@@ -99,28 +99,50 @@ public class LocalFileSystem implements Storage<File> {
      * @param fromFiles
      * @param toCrawlFiles
      */
-    private void castFileToCrawlDataFile(File[] fromFiles, CrawlDataFile[] toCrawlFiles){
+    private void readCrawlDataFiles(File[] fromFiles, CrawlDataFile[] toCrawlFiles){
         ObjectInputStream in = null;
         for (int i=0; i<fromFiles.length; i++){
+            File fromFile = fromFiles[i];
+            String fileName = fromFile.getName();
+
             try {
-                in = new ObjectInputStream(new FileInputStream(fromFiles[i]));
-                toCrawlFiles[i] =(CrawlDataFile) in.readObject();
-            } catch (Exception e) {continue;}
+                if (fileName.endsWith(CrawlDataFile.EXTENSION_URL)){
+                    toCrawlFiles[i]=readUrlFile(fromFile);
+                }else {
+                    //Process '.crawl' files
+                    in = new ObjectInputStream(new FileInputStream(fromFile));
+                    toCrawlFiles[i] = (CrawlDataFile) in.readObject();
+                }
+            } catch (Exception e) { continue; }
         }
+        // TODO: Is it a proper way of closing stream. 
         try {
             if (in!=null) in.close();
         } catch (IOException e) {}
     }
+
+    private CrawlDataFile readUrlFile(File urlFile) throws CrawlDataFileException {
+        if (!urlFile.getName().toLowerCase().endsWith(CrawlDataFile.EXTENSION_URL))
+            throw new InvalidCrawlDataFileException();
+            CrawlDataFile crawlDataFile = new CrawlDataFile(urlFile.toPath());
+        return crawlDataFile;
+    }
+
+
 
     /***
      * Gathers 'CrawlData-s' from 'CrawDataFile-s' in a list.
      * @return an instance of 'Iterator<CrawlData>'
      */
     @Override
-    public Iterator<CrawlData> iterateCrawlData(){ // TODO: Extract the method into independent interface.
+    public Iterator<CrawlData> iterateCrawlData() throws InvaildStorageException { // TODO: Extract the method into independent interface.
+        if (!loaded) {
+            load();
+            loaded = true;
+        }
         LinkedList<CrawlData> crawlDatas = new LinkedList<>();
         for (CrawlDataFile crawlFile : this.crawlDataFiles){
-            if (!crawlFile.isValid()) continue; // TODO: Is it required to be called ? 
+//            if (!crawlFile.isValid()) continue; // TODO: Is it required to be called ?
             crawlDatas.addAll(crawlFile.getListOfCrawlData());
         }
         return crawlDatas.iterator();

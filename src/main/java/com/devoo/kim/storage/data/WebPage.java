@@ -27,6 +27,8 @@ public class WebPage extends CrawlData {
      * @param headers : Response 'Header-s'
      * @throws MalformedURLException
      */
+
+    // TODO: 16. 10. 31 URL Normalizer 
     public WebPage(String url, int status, String document, Header[] headers) throws MalformedURLException {
         this(url, status, document);
         this.headers = headers;

@@ -11,7 +11,7 @@ import java.util.Iterator;
  *
  * @Behavior: This interface is not a concrete, but offers interface to implement concrete behaviors.
  */
-public interface Storage<T1> extends Closeable{
+public interface Storage<TypeOfStorage> extends Closeable{
 
     /**
      * Connect/Access to this Storage
@@ -31,7 +31,7 @@ public interface Storage<T1> extends Closeable{
      * @return Loaded data set/files
      * @throws Exception in case of failure
      */
-    public void load(String path) throws Exception; // TODO: 16. 10. 20 Define StorageLoadFailure Exception.
+    public void load() throws Exception; // TODO: 16. 10. 20 Define StorageLoadFailure Exception.
 
     /**
      * Tries to reload data/files on memory from physical storage.
@@ -46,9 +46,9 @@ public interface Storage<T1> extends Closeable{
      * and generates 'Task' with 'CrawlData'
      * @return an instance of 'Task'
      */
-    public Iterator<CrawlData> iterateCrawlData();
+    public Iterator<CrawlData> iterateCrawlData() throws InvaildStorageException;
     // TODO: 16. 10. 17 Think how to implement close();
 
-    public T1  getRoot();
+    public TypeOfStorage getRoot();
 
 }

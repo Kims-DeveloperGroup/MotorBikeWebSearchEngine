@@ -12,6 +12,7 @@ import java.util.HashMap;
 /**
  * @Responsibility: Loads Abstraction 'Storage-s' from given paths
  * @Behavior: StorageLoader instantiates several types of storage instances with given protocols. And Initialize the map of 'Storage-s"
+ * @Instantiation: By calling 'static StorageLoader initialize(String... paths)'
  * @Note:
  * 1) Once initialized, The instance does not allow to change.(If you try to re-initialize, That throws an exception)
  * 2) If modification is required, new instantiation is required.

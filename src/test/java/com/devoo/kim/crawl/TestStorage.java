@@ -19,6 +19,8 @@ import static org.junit.Assert.assertTrue;
 /**
  * Created by devoo-kim on 16. 10. 24.
  */
+
+// TODO: 16. 10. 30 Make 'Domain API for test' and 'Given-When-Then Pattern' 
 public class TestStorage {
     @Test
     public void TestAccessOneLocalFileSystem1_Positive() throws InvaildStorageException, IOException {
