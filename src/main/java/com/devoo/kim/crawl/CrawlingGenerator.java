@@ -1,8 +1,10 @@
 package com.devoo.kim.crawl;
 
 import com.devoo.kim.context.Contexts;
+import com.devoo.kim.crawl.exception.CrawlingTaskException;
 import com.devoo.kim.storage.Storage;
 import com.devoo.kim.storage.data.CrawlData;
+import com.devoo.kim.storage.exception.StorageException;
 
 import java.util.HashMap;
 import java.util.Iterator;
@@ -48,28 +50,30 @@ public class CrawlingGenerator extends Thread {// TODO: Handle Multi-Thread Issu
     public synchronized void start() {
         String key;
         Storage storage;
-        Iterator<CrawlData> iterator;// iteration 'CrawlData-s' from a loaded 'Storage'
+        Iterator<CrawlData> crawlDatas;// iteration 'CrawlData-s' from a loaded 'Storage'
         CrawlData crawlData;
         Crawling crawlTask;
         for (Map.Entry<String, Storage> storageEntry : storages.entrySet()){
             this.status.set(Crawler.RUNNING); /**#RUNNING**/
             key = storageEntry.getKey();
             storage = storageEntry.getValue();
-            if (!storage.isValid()){
-                continue; // TODO: 16. 10. 18 Log: Metadata of Invalid Storage
-            }
             try{
                 this.status.set(Crawler.DELAYED);/**#DELAYED(for loading 'CrawlData-s')**/
-                iterator=storage.iterateCrawlData();
-                while (iterator.hasNext()){
+                crawlDatas=storage.getCrawlData().iterator();
+                while (crawlDatas.hasNext()){
                     this.status.set(Crawler.RUNNING); /**#RUNNING**/
-                    crawlData= iterator.next();
-                    crawlTask =Contexts.generateCrawling(crawlData);
-                    this.status.set(Crawler.WAITING);
-                    crawlingQueue.put(crawlTask);/**#WAITING (Being blocked until crawlingQueue is available to put).
-                     Possibly Deadlock (crawlingQueue is being taken && crawlingQueue)**/
+                    try {
+                        crawlData = crawlDatas.next();
+                        crawlTask = Contexts.generateCrawling(crawlData);
+                        this.status.set(Crawler.WAITING);
+                        crawlingQueue.put(crawlTask);
+                        /**#WAITING (Being blocked until crawlingQueue is available to put).
+                         Possibly Deadlock (crawlingQueue is being taken && crawlingQueue)**/
+                    }catch (CrawlingTaskException e){continue;}
                 }
-            }catch (Exception e){}
+            }catch (StorageException e) {continue;}
+             catch (InterruptedException e) {}
+
         }
         this.status.set(Crawler.COMPLETE);/**#COMPLETE**/
     }

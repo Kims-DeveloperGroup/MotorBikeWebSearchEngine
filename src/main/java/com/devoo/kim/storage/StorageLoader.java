@@ -3,7 +3,7 @@ package com.devoo.kim.storage;
 import com.devoo.kim.context.Contexts;
 import com.devoo.kim.storage.exception.InvaildStorageException;
 import com.devoo.kim.storage.exception.InvalidStorageLoaderException;
-import com.devoo.kim.storage.exception.LoaderInitializationFailureExcepation;
+import com.devoo.kim.storage.exception.LoaderInitializationFailureException;
 
 import java.net.URI;
 import java.net.URISyntaxException;
@@ -25,8 +25,8 @@ public class StorageLoader {
     private boolean isInitialized=false;
     private HashMap<String, Storage> storages; /**@Must:Immutable*/
 
-    private StorageLoader(HashMap<String, Storage> storages) throws LoaderInitializationFailureExcepation {
-        if (isInitialized) throw new LoaderInitializationFailureExcepation(); // TODO: 16. 10. 17 Define Custom InitializedException to prevent change.
+    private StorageLoader(HashMap<String, Storage> storages) throws LoaderInitializationFailureException {
+        if (isInitialized) throw new LoaderInitializationFailureException(); // TODO: 16. 10. 17 Define Custom InitializedException to prevent change.
         this.storages = storages;
         isInitialized= true;
         initTime=System.currentTimeMillis();
@@ -39,7 +39,7 @@ public class StorageLoader {
      * @param paths : paths of storage to be loaded.
      * @return an instance of 'StorageLoader' if any of 'Storage-s' are added and ready to load 'CrawlData-s'/'CrawlDataFile-s'
      */
-    public static StorageLoader initialize(String... paths) throws LoaderInitializationFailureExcepation {// TODO: 16. 10. 17 Not Nomalize uri yet.
+    public static StorageLoader initialize(String... paths) throws LoaderInitializationFailureException {// TODO: 16. 10. 17 Not Nomalize uri yet.
         StorageLoader loader;
         URI uri;
         HashMap<String, Storage> tempStorages =new HashMap<>();
@@ -54,7 +54,7 @@ public class StorageLoader {
             }catch (URISyntaxException e) {continue;}
             catch (InvaildStorageException e) {continue;}
         }
-        if (tempStorages.isEmpty()) new LoaderInitializationFailureExcepation();
+        if (tempStorages.isEmpty()) new LoaderInitializationFailureException();
         loader = new StorageLoader(tempStorages);
         return loader;
     }

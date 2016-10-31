@@ -28,7 +28,7 @@ public class CrawlDataFile implements Serializable{
     private boolean written =false;
     private File file;
     private String absolutePath;
-    private LinkedList<CrawlData> listOfCrawlData = new LinkedList<>();
+    private LinkedList<CrawlData> crawlDatas = new LinkedList<>();
 
 
     public CrawlDataFile(Path path) throws CrawlDataFileException {
@@ -43,11 +43,11 @@ public class CrawlDataFile implements Serializable{
         absolutePath = file.getAbsolutePath();
 
         if (file.getName().toLowerCase().endsWith(EXTENSION_URL)){
-            convertUrlFileToCrawlDataFile(file);
+            parseUrlFileToCrawlDataFile(file);
         }
     }
 
-    private void convertUrlFileToCrawlDataFile(File urlFile) throws CrawlDataFileException {
+    private void parseUrlFileToCrawlDataFile(File urlFile) throws CrawlDataFileException {
         if (!urlFile.getName().toLowerCase().endsWith(CrawlDataFile.EXTENSION_URL)
                 || !urlFile.exists())
             throw new InvalidCrawlDataFileException();
@@ -105,12 +105,12 @@ public class CrawlDataFile implements Serializable{
      */
     public void add(CrawlData crawlData) throws CrawlDataFileReadOnlyExcepation {
         if (written) throw new CrawlDataFileReadOnlyExcepation();
-        listOfCrawlData.add(crawlData);
+        crawlDatas.add(crawlData);
     }
 
     public void add(Collection<? extends CrawlData> crawlData) throws Exception {
         if (written) throw new Exception();
-        listOfCrawlData.addAll(crawlData);
+        crawlDatas.addAll(crawlData);
     }
 
     public boolean isValid(){
@@ -122,7 +122,7 @@ public class CrawlDataFile implements Serializable{
      *
      * @return a clone of 'LinkedList<CrawlData>' for 'CopyOnWrite' Todo: Think about using 'Immutable Collection' instead.
      */
-    public LinkedList<CrawlData> getListOfCrawlData() {
-        return (LinkedList<CrawlData>)listOfCrawlData.clone();
+    public LinkedList<CrawlData> getCrawlData() {
+        return (LinkedList<CrawlData>) crawlDatas.clone();
     }
 }

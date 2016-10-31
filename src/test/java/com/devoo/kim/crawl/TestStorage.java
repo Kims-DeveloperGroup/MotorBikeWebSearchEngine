@@ -5,7 +5,7 @@ import com.devoo.kim.storage.Storage;
 import com.devoo.kim.storage.StorageLoader;
 import com.devoo.kim.storage.exception.InvaildStorageException;
 import com.devoo.kim.storage.exception.InvalidStorageLoaderException;
-import com.devoo.kim.storage.exception.LoaderInitializationFailureExcepation;
+import com.devoo.kim.storage.exception.LoaderInitializationFailureException;
 import org.junit.Test;
 
 import java.io.File;
@@ -20,8 +20,9 @@ import static org.junit.Assert.assertTrue;
  * Created by devoo-kim on 16. 10. 24.
  */
 
-// TODO: 16. 10. 30 Make 'Domain API for test' and 'Given-When-Then Pattern' 
-public class TestStorage {
+// TODO: 16. 10. 30 Make 'Domain API for test' and 'Given-When-Then Pattern'
+    //Refactor by extending 'TestScenario1'
+public class TestStorage{
     @Test
     public void TestAccessOneLocalFileSystem1_Positive() throws InvaildStorageException, IOException {
         String localPath1 = "/home/devoo-kim/IdeaProjects/MotorBikeWebSearchEngine/src/test/resources/localstorage1";
@@ -116,7 +117,7 @@ public class TestStorage {
     }
 
     @Test
-    public void TestIfAnyStorageNotExists() throws LoaderInitializationFailureExcepation {
+    public void TestIfAnyStorageNotExists() throws LoaderInitializationFailureException {
         String localPath1 = "/home/devoo-kim/IdeaProjects/MotorBikeWebSearchEngine/src/test/resources/localstorage1";
         String localPath2 = "/home/devoo-kim/IdeaProjects/MotorBikeWebSearchEngine/src/test/resources/localstorage2";
         String localPath3 = "/home/devoo-kim/IdeaProjects/MotorBikeWebSearchEngine/src/test/resources/localstorage3";

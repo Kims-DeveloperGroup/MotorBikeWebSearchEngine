@@ -1,6 +1,7 @@
 package com.devoo.kim.context;
 
 import com.devoo.kim.crawl.Crawling;
+import com.devoo.kim.crawl.exception.CrawlingTaskException;
 import com.devoo.kim.storage.Storage;
 import com.devoo.kim.storage.data.CrawlData;
 import com.devoo.kim.storage.exception.InvaildStorageException;
@@ -24,8 +25,11 @@ public final class Contexts {
         return storage;
     }
 
-    public static Crawling generateCrawling(CrawlData crawlData){
-        return (Crawling) TASKS.getBean(crawlData.getDataType(), crawlData);
+    // TODO: 16. 10. 31 BeanCreationException: Error creating bean with name 'http' 
+    public static Crawling generateCrawling(CrawlData crawlData) throws CrawlingTaskException {
+        Crawling crawling =(Crawling) TASKS.getBean("http", crawlData);
+        crawling.setCrawlData(crawlData);
+        return crawling;
     }
 
     public static void main(String[] args){}

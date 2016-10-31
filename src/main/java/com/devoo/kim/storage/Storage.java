@@ -2,9 +2,11 @@ package com.devoo.kim.storage;
 
 import com.devoo.kim.storage.data.CrawlData;
 import com.devoo.kim.storage.exception.InvaildStorageException;
+import com.devoo.kim.storage.exception.StorageLoadException;
 
 import java.io.Closeable;
 import java.util.Iterator;
+import java.util.List;
 
 /**
  *@Responsibility: An abstraction of storage loaded on memory. e.g) Local File System, HDFS, etc.
@@ -42,11 +44,10 @@ public interface Storage<TypeOfStorage> extends Closeable{
     public void reload() throws Exception; // TODO: Define StorageLoadFailure Exception.
 
     /***
-     * Iterates 'CrawlData-s' from the beginning of loaded data,
-     * and generates 'Task' with 'CrawlData'
-     * @return an instance of 'Task'
+     * Gets 'CrawlData-s' from loaded 'CrawlDataFile-s'
+     * @return instances of 'CrawData-s'
      */
-    public Iterator<CrawlData> iterateCrawlData() throws InvaildStorageException;
+    public List<CrawlData> getCrawlData() throws InvaildStorageException, StorageLoadException;
     // TODO: 16. 10. 17 Think how to implement close();
 
     public TypeOfStorage getRoot();

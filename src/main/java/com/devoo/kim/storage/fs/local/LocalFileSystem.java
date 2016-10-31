@@ -9,8 +9,6 @@ import com.devoo.kim.storage.fs.exception.CrawlDataFileException;
 import com.devoo.kim.storage.fs.exception.InvalidCrawlDataFileException;
 
 import java.io.*;
-import java.nio.file.Files;
-import java.nio.file.Paths;
 import java.util.Iterator;
 import java.util.LinkedList;
 import java.util.List;
@@ -59,13 +57,13 @@ public class LocalFileSystem implements Storage<File> {
     }
 
     /**
-     * Load 'File-s' with '.crawl' extension and Store them in a type of 'CrawlDataFile'.
+     * Load 'File-s' with '.crawl' extension and read them into 'CrawlDataFile-s'.
      * if 'CrawlDataFile-s' have been loaded, nothing is loaded.
      * @throws InvaildStorageException  when the path is an invalid storage.
      */
     @Override
-    public void load() throws InvaildStorageException {
-        if (!isValid()) throw new InvaildStorageException();
+    public void load() throws StorageLoadException {
+        if (!isValid()) throw new StorageLoadException();
         File[] files;
         if (this.crawlDataFiles ==null){
             files =rootDir.listFiles(fileFilter);
@@ -79,22 +77,22 @@ public class LocalFileSystem implements Storage<File> {
      * if it had not been loaded before, an exception is thrown.
      * @throws StorageLoadException
      */
-
     public void reload() throws StorageLoadException {
-        CrawlDataFile[] temp =this.crawlDataFiles;
-        this.loaded = false;
-
+        CrawlDataFile[] temp =crawlDataFiles;
+        loaded = false;
         try {
             load();
-        } catch (InvaildStorageException e) {
-            this.crawlDataFiles =temp;
+        } catch (StorageLoadException e) {
+            crawlDataFiles =temp;
+            this.loaded =true;
             throw new StorageLoadException();
+        }finally {
+            /****/
         }
-        this.loaded =true;
     }
 
     /**
-     * Read objects from an array of 'File' from local file system into another array of 'CrawlDataFile'
+     * Parse an array of files('.crawl'/'.url') from the specified path into 'CrawlDataFile-s'
      * @Note: Ignores a 'File' that throws an exception by handling the exception in this method
      * @param fromFiles
      * @param toCrawlFiles
@@ -106,14 +104,13 @@ public class LocalFileSystem implements Storage<File> {
             String fileName = fromFile.getName();
 
             try {
-                if (fileName.endsWith(CrawlDataFile.EXTENSION_URL)){
-                    toCrawlFiles[i]=readUrlFile(fromFile);
+                if(fileName.toLowerCase().endsWith(CrawlDataFile.EXTENSION_URL)){
+                    toCrawlFiles[i]= parseUrlFile(fromFile);
                 }else {
                     //Process '.crawl' files
-                    in = new ObjectInputStream(new FileInputStream(fromFile));
-                    toCrawlFiles[i] = (CrawlDataFile) in.readObject();
+                    toCrawlFiles[i] = parseCrawlFile(fromFile);
                 }
-            } catch (Exception e) { continue; }
+            } catch (CrawlDataFileException e) { continue; }//Handle CrawlDataFileException, FileNotFoundException, ClassNotFoundException
         }
         // TODO: Is it a proper way of closing stream. 
         try {
@@ -121,11 +118,35 @@ public class LocalFileSystem implements Storage<File> {
         } catch (IOException e) {}
     }
 
-    private CrawlDataFile readUrlFile(File urlFile) throws CrawlDataFileException {
+    /**
+     * Parses 'UrlFile(.url)' as a CrawlDataFile instance.
+     * @param urlFile, which has '.url' extension.
+     * @return an instance of 'CrawlDataFile' parsed from a passed 'UrlFile(.url)'
+     * @throws CrawlDataFileException if instantiation of 'CrawlDataFile' fails.
+     */
+    private CrawlDataFile parseUrlFile(File urlFile) throws CrawlDataFileException {
         if (!urlFile.getName().toLowerCase().endsWith(CrawlDataFile.EXTENSION_URL))
             throw new InvalidCrawlDataFileException();
-            CrawlDataFile crawlDataFile = new CrawlDataFile(urlFile.toPath());
+        CrawlDataFile crawlDataFile = new CrawlDataFile(urlFile.toPath());
         return crawlDataFile;
+    }
+
+    /**
+     * Parses 'CrawlFile(.crawl)' as a CrawlDataFile instance.
+     * @param crawlFile, which has '.crawl' extension.
+     * @return an instance of 'CrawlDataFile' parsed from a passed 'CrawlFile(.crawl)'
+     * @throws CrawlDataFileException if instantiation of 'CrawlDataFile' fails.
+     */
+
+    private  CrawlDataFile parseCrawlFile(File crawlFile) throws CrawlDataFileException{
+        if (!crawlFile.getName().toLowerCase().endsWith(CrawlDataFile.EXTENSION_URL))
+            throw new InvalidCrawlDataFileException();
+        try {
+            ObjectInputStream in = new ObjectInputStream(new FileInputStream(crawlFile));
+            CrawlDataFile crawlDataFile = (CrawlDataFile) in.readObject();
+            return crawlDataFile;
+        } catch (IOException e) {throw new CrawlDataFileException();}
+          catch (ClassNotFoundException e) {throw new CrawlDataFileException();}
     }
 
 
@@ -135,17 +156,16 @@ public class LocalFileSystem implements Storage<File> {
      * @return an instance of 'Iterator<CrawlData>'
      */
     @Override
-    public Iterator<CrawlData> iterateCrawlData() throws InvaildStorageException { // TODO: Extract the method into independent interface.
+    public List<CrawlData> getCrawlData() throws StorageLoadException { // TODO: Extract the method into independent interface.
         if (!loaded) {
             load();
             loaded = true;
         }
         LinkedList<CrawlData> crawlDatas = new LinkedList<>();
         for (CrawlDataFile crawlFile : this.crawlDataFiles){
-//            if (!crawlFile.isValid()) continue; // TODO: Is it required to be called ?
-            crawlDatas.addAll(crawlFile.getListOfCrawlData());
+            crawlDatas.addAll(crawlFile.getCrawlData());
         }
-        return crawlDatas.iterator();
+        return crawlDatas;
     }
 
     @Override
