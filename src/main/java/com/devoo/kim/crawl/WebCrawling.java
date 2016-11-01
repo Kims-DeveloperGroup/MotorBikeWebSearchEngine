@@ -2,6 +2,7 @@ package com.devoo.kim.crawl;
 
 
 import com.devoo.kim.crawl.exception.NoCrawlingTargetException;
+import com.devoo.kim.storage.data.CrawlData;
 import com.devoo.kim.storage.data.WebPage;
 import org.apache.http.Header;
 import org.apache.http.client.methods.CloseableHttpResponse;
@@ -24,15 +25,19 @@ public class WebCrawling extends Crawling<WebPage> {
     static CloseableHttpClient httpClient = HttpClients.createDefault();
     private HttpGet httpGet;
     private CloseableHttpResponse response;
+    private WebPage webPage;
 
-//    public WebCrawling(){}
+    public WebCrawling(CrawlData crawlData){
+        System.out.println("WebCrawling(CrawlData);");//OK
+        webPage = (WebPage) crawlData;
+    }
     @Override
     public WebPage call() throws NoCrawlingTargetException { // TODO: 16. 10. 22 Add Time-out function to be cancelled.
         String content;
         int status;
         Header[] headers;
         
-        WebPage page = getCrawlData();
+        WebPage page = webPage;
         try {
             httpGet = new HttpGet(page.urlStr);
             response = httpClient.execute(httpGet);  // TODO: Stuck and Blocked (NOT SOLVED)

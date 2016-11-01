@@ -28,7 +28,7 @@ public final class Contexts {
     // TODO: 16. 10. 31 BeanCreationException: Error creating bean with name 'http' 
     public static Crawling generateCrawling(CrawlData crawlData) throws CrawlingTaskException {
         Crawling crawling =(Crawling) TASKS.getBean("http", crawlData);
-        crawling.setCrawlData(crawlData);
+//        crawling.setCrawlData(crawlData);
         return crawling;
     }
 
