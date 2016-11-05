@@ -25,11 +25,10 @@ public class WebCrawling extends Crawling<WebPage> {
     static CloseableHttpClient httpClient = HttpClients.createDefault();
     private HttpGet httpGet;
     private CloseableHttpResponse response;
-    private WebPage webPage;
 
-    public WebCrawling(CrawlData crawlData){
+    public WebCrawling(WebPage crawlData){
+        super(crawlData);
         System.out.println("WebCrawling(CrawlData);");//OK
-        webPage = (WebPage) crawlData;
     }
     @Override
     public WebPage call() throws NoCrawlingTargetException { // TODO: 16. 10. 22 Add Time-out function to be cancelled.
@@ -37,7 +36,7 @@ public class WebCrawling extends Crawling<WebPage> {
         int status;
         Header[] headers;
         
-        WebPage page = webPage;
+        WebPage page = getCrawlData();
         try {
             httpGet = new HttpGet(page.urlStr);
             response = httpClient.execute(httpGet);  // TODO: Stuck and Blocked (NOT SOLVED)

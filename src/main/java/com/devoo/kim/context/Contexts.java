@@ -1,11 +1,10 @@
 package com.devoo.kim.context;
 
 import com.devoo.kim.crawl.Crawling;
-import com.devoo.kim.crawl.exception.CrawlingTaskException;
+import com.devoo.kim.crawl.exception.CrawlingException;
 import com.devoo.kim.storage.Storage;
 import com.devoo.kim.storage.data.CrawlData;
 import com.devoo.kim.storage.exception.InvaildStorageException;
-import com.sun.nio.sctp.InvalidStreamException;
 import org.springframework.context.ApplicationContext;
 import org.springframework.context.support.FileSystemXmlApplicationContext;
 
@@ -25,8 +24,7 @@ public final class Contexts {
         return storage;
     }
 
-    // TODO: 16. 10. 31 BeanCreationException: Error creating bean with name 'http' 
-    public static Crawling generateCrawling(CrawlData crawlData) throws CrawlingTaskException {
+    public static Crawling generateCrawling(CrawlData crawlData){
         Crawling crawling =(Crawling) TASKS.getBean("http", crawlData);
 //        crawling.setCrawlData(crawlData);
         return crawling;

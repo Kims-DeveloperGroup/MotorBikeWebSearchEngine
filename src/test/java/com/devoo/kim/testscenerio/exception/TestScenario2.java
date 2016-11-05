@@ -36,7 +36,7 @@ public class TestScenario2 {
         storages.put(localStoragePath1, localStorage1);
     }
 
-    @BeforeClass
+//    @BeforeClass
     public void setTestUrlFile() throws IOException {
         if (!testUrlFile.exists()||
                 (testUrlFile.exists() && !testUrlFile.isFile())){

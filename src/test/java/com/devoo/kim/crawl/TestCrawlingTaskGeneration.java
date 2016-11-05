@@ -19,15 +19,26 @@ public class TestCrawlingTaskGeneration extends TestScenario2{
     }
 
     @Test
-    public void TestCrawlTaskGenerationWithInput() throws TestException, InterruptedException {
+    public void TestCrawlTaskGenerationWithoutTaskCountLimit() throws TestException, InterruptedException {
         int count=0;
         CrawlingGenerator crawlingGenerator = new CrawlingGenerator(storages);
         crawlingGenerator.start();
-//        crawlingGenerator.run();
         BlockingQueue<Crawling> crawlings = crawlingGenerator.getCrawlingQueue();
         crawlingGenerator.join();
-
+        count =crawlings.size();
         assertTrue(count == numberOfTestUrls);
+    }
+
+    @Test
+    public void TestCrawlTaskGenerationWithTaskCountLimit() throws TestException, InterruptedException {
+        int count=0;
+        int expected =500;
+        CrawlingGenerator crawlingGenerator = new CrawlingGenerator(storages, 500);
+        crawlingGenerator.start();
+        BlockingQueue<Crawling> crawlings = crawlingGenerator.getCrawlingQueue();
+        crawlingGenerator.setDaemon(true);
+        count =crawlings.size();
+        assertTrue(count == expected);
     }
 
     private int takeItems(BlockingQueue<Crawling> crawlings) throws TestException {
@@ -51,7 +62,9 @@ public class TestCrawlingTaskGeneration extends TestScenario2{
             e.printStackTrace();
         }
         try {
-            test.TestCrawlTaskGenerationWithInput();
+//            test.TestCrawlTaskGenerationWithoutTaskCountLimit();
+            test.TestCrawlTaskGenerationWithTaskCountLimit();
+
         } catch (TestException e) {
             e.printStackTrace();
         } catch (InterruptedException e) {

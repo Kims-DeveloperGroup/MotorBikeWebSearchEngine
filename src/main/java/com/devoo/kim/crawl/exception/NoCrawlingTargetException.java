@@ -3,5 +3,5 @@ package com.devoo.kim.crawl.exception;
 /**
  * Created by devoo-kim on 16. 10. 31.
  */
-public class NoCrawlingTargetException extends CrawlingTaskException {
+public class NoCrawlingTargetException extends CrawlingException {
 }
