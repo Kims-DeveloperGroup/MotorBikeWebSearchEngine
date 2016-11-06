@@ -21,20 +21,26 @@ import java.util.Iterator;
  */
 public class TestScenario2 {
 
-    final String basePath ="src/test/resources/scenario2/";
-    final String localStoragePath1 ="src/test/resources/scenario2/localstorage1/";
-    final public Storage<File> localStorage1;
-    public HashMap<String, Storage> storages = new HashMap<>(4);
-    final String testFileName ="testUrls.url";
-    final File testUrlFile = new File(localStoragePath1+testFileName);
-    final Path testUrlPath = testUrlFile.toPath();
-    public final int numberOfTestUrls = 1000;
-    public CrawlData[] testCrawlData = new CrawlData[numberOfTestUrls];
+    private static final String BASE_PATH ="src/test/resources/scenario2/";
+    private static final String LOCAL_STORAGE_PATH_1 ="src/test/resources/scenario2/localstorage1/";
+    public static Storage<File> LOCAL_STORAGE_1;
+    public static final HashMap<String, Storage> STORAGES = new HashMap<>(4);
 
-    public TestScenario2() throws InvaildStorageException {
-        localStorage1 = Contexts.generateStorageConnection("file", localStoragePath1);
-        storages.put(localStoragePath1, localStorage1);
+    private final String testFileName ="testUrls.url";
+    private final File testUrlFile = new File(LOCAL_STORAGE_PATH_1 +testFileName);
+    private final Path testUrlPath = testUrlFile.toPath();
+
+    public final int TOTAL_URLS = 1000;
+    public CrawlData[] testCrawlData = new CrawlData[TOTAL_URLS];
+
+    static {
+        try {
+            LOCAL_STORAGE_1 =
+                    Contexts.generateStorageConnection("file", LOCAL_STORAGE_PATH_1);
+            STORAGES.put(LOCAL_STORAGE_PATH_1, LOCAL_STORAGE_1);
+        } catch (InvaildStorageException e) {}
     }
+
 
 //    @BeforeClass
     public void setTestUrlFile() throws IOException {
@@ -45,7 +51,7 @@ public class TestScenario2 {
 
             BufferedWriter writer = new BufferedWriter(new FileWriter(testUrlFile));
             StringBuilder builder = new StringBuilder();
-            for (int i =0; i<numberOfTestUrls; i++){
+            for (int i = 0; i< TOTAL_URLS; i++){
                 builder.append("http://www.scenario2.testurl").append(i)
                         .append(".com/\n");
             }
@@ -55,7 +61,7 @@ public class TestScenario2 {
         }
     }
     private void setStorages(){
-        storages.put(localStoragePath1,localStorage1);
+        STORAGES.put(LOCAL_STORAGE_PATH_1, LOCAL_STORAGE_1);
     }
 
     private void generateTestCrawlDatas() throws IOException {

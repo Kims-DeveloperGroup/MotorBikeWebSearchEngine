@@ -5,8 +5,7 @@ import com.devoo.kim.storage.Storage;
 import com.devoo.kim.storage.StorageLoader;
 import com.devoo.kim.storage.exception.InvaildStorageException;
 import com.devoo.kim.storage.exception.InvalidStorageLoaderException;
-import com.devoo.kim.testscenerio.exception.InvalidTestInputException;
-import org.junit.BeforeClass;
+import com.devoo.kim.testscenerio.exception.InvalidTestInputFailureException;
 
 import java.io.File;
 import java.io.IOException;
@@ -50,9 +49,9 @@ abstract public class TestScenario1 {
 
     private int countUrlsFromOneLocalStorage(Storage localStorage){return 0;}
 
-    private int countUrls(File urlFile) throws InvalidTestInputException, IOException {
+    private int countUrls(File urlFile) throws InvalidTestInputFailureException, IOException {
         if (!urlFile.getName().toLowerCase().endsWith(".url"))
-            throw new InvalidTestInputException();
+            throw new InvalidTestInputFailureException();
         List<String> urls =Files.readAllLines(urlFile.toPath());
         return urls.size();
     }
