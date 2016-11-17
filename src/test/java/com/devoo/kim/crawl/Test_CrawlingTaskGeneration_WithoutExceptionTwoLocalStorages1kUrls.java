@@ -1,18 +1,22 @@
 package com.devoo.kim.crawl;
 
 import com.devoo.kim.testscenerio.exception.TestFailureException;
-import com.devoo.kim.testscenerio.exception.TestScenario2;
+import com.devoo.kim.testscenerio.TestCase2_TwoLocalStorages_1kUrls;
 import org.junit.Test;
 
 import java.lang.Thread.State;
 import java.util.concurrent.BlockingQueue;
-
+import java.util.concurrent.TimeUnit;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 import static org.junit.Assert.assertTrue;
 
 /**
  * Created by devoo-kim on 16. 10. 31.
  */
-public class Test_CrawlingTaskGeneration_WithoutException extends TestScenario2{
+public class Test_CrawlingTaskGeneration_WithoutExceptionTwoLocalStorages1kUrls extends TestCase2_TwoLocalStorages_1kUrls {
+    Logger logger = LoggerFactory.getLogger(Test_CrawlingTaskGeneration_WithoutExceptionTwoLocalStorages1kUrls.class);
+
 
 
     @Test
@@ -54,7 +58,6 @@ public class Test_CrawlingTaskGeneration_WithoutException extends TestScenario2{
         BlockingQueue<Crawling> crawlQue = generator.getCrawlingQueue();
         generator.start();
         actual =consumesCrawlingTasks(generator);
-        System.out.println(generator.getState().name());
         assertTrue(actual == expected);
     }
 
@@ -69,23 +72,29 @@ public class Test_CrawlingTaskGeneration_WithoutException extends TestScenario2{
     private int consumesCrawlingTasks(CrawlingGenerator generator) throws TestFailureException {
         BlockingQueue<Crawling> crawlQue =generator.getCrawlingQueue();
         int consumption =0;
+        int waiting =0; //Micro Second
         while (generator.isAlive() || !generator.isEmpty()){
+            Crawling crawling;
             try {
-                System.out.println(consumption);
                 System.out.println(generator.getState().name());
-                crawlQue.take();//Possibly Blocekd.
-                consumption++;
+                crawling =crawlQue.poll(1, TimeUnit.MICROSECONDS);//Re-check state of generator
+                if (crawling!=null) {
+                    logger.info("Consuming {} items", consumption);
+                    consumption++;
+                    waiting=0;
+                }
+                else waiting++;
             } catch (InterruptedException e) {
                 throw new TestFailureException();
             }
         }
-        System.out.println("All consumed!");
-
+        logger.info("{} items were consumed!", consumption);
         return consumption;
     }
 
     public static void main(String[] args){
-        Test_CrawlingTaskGeneration_WithoutException test = new Test_CrawlingTaskGeneration_WithoutException();
+        Test_CrawlingTaskGeneration_WithoutExceptionTwoLocalStorages1kUrls test
+                = new Test_CrawlingTaskGeneration_WithoutExceptionTwoLocalStorages1kUrls();
         try {
             test.Test_BeingConsumed();
         } catch (TestFailureException e) {

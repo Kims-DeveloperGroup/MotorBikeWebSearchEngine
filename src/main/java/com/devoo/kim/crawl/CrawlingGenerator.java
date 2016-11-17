@@ -4,6 +4,8 @@ import com.devoo.kim.context.Contexts;
 import com.devoo.kim.storage.Storage;
 import com.devoo.kim.storage.data.CrawlData;
 import com.devoo.kim.storage.exception.StorageException;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 
 import java.util.HashMap;
 import java.util.Iterator;
@@ -20,7 +22,12 @@ public class CrawlingGenerator extends Thread {// TODO: Handle Multi-Thread Issu
     private Map<String, Storage> storages;
     private BlockingQueue<Crawling> crawlingQueue;
     private static int capacity =1000;
+
     // TODO: Log:  Count total size of output and Running Time.
+    Logger logger = LoggerFactory.getLogger(CrawlingGenerator.class+getName());
+    long initTime=-1;
+    long endTime=-1;
+    long runningTime =-1;
 
     /**
      * @param storages ,from which instances of 'CrawlData' are loaded.
@@ -41,6 +48,7 @@ public class CrawlingGenerator extends Thread {// TODO: Handle Multi-Thread Issu
      */
     @Override
     public void run() {
+        logger.info("Started at: "+ (initTime=System.currentTimeMillis()));
         String key;
         Storage storage;
         Iterator<CrawlData> crawlDatas;// iteration 'CrawlData-s' from a loaded 'Storage'
@@ -59,8 +67,8 @@ public class CrawlingGenerator extends Thread {// TODO: Handle Multi-Thread Issu
             }catch (StorageException e) {continue;}
              catch (InterruptedException e) {}
         }
-        System.out.println("All generated!");
-
+        logger.info("Finished at: {}",(endTime=System.currentTimeMillis()));
+        logger.info("Running Time: {} /mill", (endTime-initTime));
     }
 
     public BlockingQueue<Crawling> getCrawlingQueue(){

@@ -1,4 +1,4 @@
-package com.devoo.kim.testscenerio.exception;
+package com.devoo.kim.testscenerio;
 
 import com.devoo.kim.context.Contexts;
 import com.devoo.kim.storage.Storage;
@@ -19,7 +19,7 @@ import java.util.Iterator;
 /**
  * Created by devoo-kim on 16. 10. 31.
  */
-public class TestScenario2 {
+public class TestCase2_TwoLocalStorages_1kUrls {
 
     private static final String BASE_PATH ="src/test/resources/scenario2/";
     private static final String LOCAL_STORAGE_PATH_1 ="src/test/resources/scenario2/localstorage1/";

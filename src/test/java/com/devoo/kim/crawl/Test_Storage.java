@@ -21,8 +21,8 @@ import static org.junit.Assert.assertTrue;
  */
 
 // TODO: 16. 10. 30 Make 'Domain API for test' and 'Given-When-Then Pattern'
-    //Refactor by extending 'TestScenario1'
-public class TestStorage{
+    //Refactor by extending 'TestCase1_FourLocalStorages_SmallUrls'
+public class Test_Storage {
     @Test
     public void TestAccessOneLocalFileSystem1_Positive() throws InvaildStorageException, IOException {
         String localPath1 = "/home/devoo-kim/IdeaProjects/MotorBikeWebSearchEngine/src/test/resources/localstorage1";

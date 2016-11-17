@@ -52,7 +52,7 @@ public class CrawlingScheduler<T1> { // TODO: Handle Multi-Thread Issue
     public void submitTasks(){
         Task task;
         Future<CrawlData> future;
-        if (!crawlingGenerator.isAlive()) crawlingGenerator.start();
+        if (!crawlingGenerator.isAlive()) crawlingGenerator.start();// TODO: 16. 11. 17
         taskWatcher.start();
         while (crawlingGenerator.isAlive() || !crawlingQueue.isEmpty()){
             try {

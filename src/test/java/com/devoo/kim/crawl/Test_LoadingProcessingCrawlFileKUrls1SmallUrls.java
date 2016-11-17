@@ -5,7 +5,7 @@ import com.devoo.kim.storage.data.CrawlData;
 import com.devoo.kim.storage.exception.InvaildStorageException;
 import com.devoo.kim.storage.exception.InvalidStorageLoaderException;
 import com.devoo.kim.storage.exception.StorageLoadException;
-import com.devoo.kim.testscenerio.TestScenario1;
+import com.devoo.kim.testscenerio.TestCase1_FourLocalStorages_SmallUrls;
 import org.junit.Test;
 
 import java.io.File;
@@ -18,7 +18,7 @@ import static org.junit.Assert.assertTrue;
 /**
  * Created by devoo-kim on 16. 10. 30.
  */
-public class TestLoadingProcessingCrawlFile extends TestScenario1 {
+public class Test_LoadingProcessingCrawlFileKUrls1SmallUrls extends TestCase1_FourLocalStorages_SmallUrls {
 
     @Test
     public void TestLoadCrawlingDataFileFromLocalFileSystem1_Positive() throws StorageLoadException, InvaildStorageException {

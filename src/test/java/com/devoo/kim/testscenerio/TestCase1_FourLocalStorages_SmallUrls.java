@@ -16,7 +16,7 @@ import java.util.List;
 /**
  * Created by devoo-kim on 16. 10. 31.
  */
-abstract public class TestScenario1 {
+abstract public class TestCase1_FourLocalStorages_SmallUrls {
     // TODO: 16. 10. 31 Check validity test resources before running a test.
 
     public static final String localPath1 = "/home/devoo-kim/IdeaProjects/MotorBikeWebSearchEngine/src/test/resources/scenario1/localstorage1";
