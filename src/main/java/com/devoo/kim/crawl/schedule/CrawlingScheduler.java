@@ -52,16 +52,19 @@ public class CrawlingScheduler<T1> { // TODO: Handle Multi-Thread Issue
     public void submitTasks(){
         Task task;
         Future<CrawlData> future;
-        if (!crawlingGenerator.isAlive()) crawlingGenerator.start();// TODO: 16. 11. 17
+        if (!crawlingGenerator.isAlive()) {
+            // TODO: 16. 11. 17 Handle a Dead Generator.
+        }
         taskWatcher.start();
         while (crawlingGenerator.isAlive() || !crawlingQueue.isEmpty()){
             try {
-                if (!taskWatcher.isAlive()){ //To restart watcher when it is died.
+                if (!taskWatcher.isAlive()){ //Restarts taskWatcher if it's not running.
                     taskWatcher=new AsyncTaskWatcher(taskListener,threads);
                     weakTaskWatcher= new WeakReference(taskWatcher);
                 }
-                if (crawlingQueue.isEmpty() && !crawlingGenerator.isAlive()) break;
-                task = crawlingQueue.take(); /**Blocked until the crawlingQueue in available. (Deadlock if taskQue isEmpty && No more being put)**/
+                task = crawlingQueue.poll(1L, TimeUnit.MILLISECONDS);
+                if (task == null) continue;
+
                 future=executorService.submit(task);
                 taskWatcher.put(future); /**Possibly Blocked (=> Limit the number of running task)**/
             } catch (InterruptedException e) {}

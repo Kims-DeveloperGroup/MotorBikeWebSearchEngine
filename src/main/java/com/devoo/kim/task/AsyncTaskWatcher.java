@@ -34,7 +34,7 @@ public class AsyncTaskWatcher extends Thread{
     }
 
     @Override
-    public synchronized void start() { // TODO: Possibility of Deadlock : Calling outside method, which might request for a lock, or wait until some condition. 
+    public void start() { // TODO: Possibility of Deadlock : Calling outside method, which might request for a lock, or wait until some condition.
         System.out.println("Started");
         while (true){ // TODO: 16. 10. 25 How to exit of loop? 
             try { // TODO: 16. 10. 24 Should be tested for possibility of Read and Write Conflict
