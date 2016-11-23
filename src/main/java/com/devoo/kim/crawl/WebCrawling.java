@@ -2,7 +2,6 @@ package com.devoo.kim.crawl;
 
 
 import com.devoo.kim.crawl.exception.NoCrawlingTargetException;
-import com.devoo.kim.storage.data.CrawlData;
 import com.devoo.kim.storage.data.WebPage;
 import org.apache.http.Header;
 import org.apache.http.client.methods.CloseableHttpResponse;
@@ -15,10 +14,11 @@ import java.io.IOException;
 import java.util.concurrent.atomic.AtomicInteger;
 
 /**
- * Created by devoo-kim on 16. 10. 12.
+ * @Responsibility: Crawls a given web page.
  */
 // TODO: 16. 10. 15 Integrate HttpClinet(for Request and Response over Network)
 // TODO:             with jSoup for parsing html dom
+
 public class WebCrawling extends Crawling<WebPage> {
     private AtomicInteger status =new AtomicInteger(Crawler.NOT_INITIALLZED);
     /**Sharing HttpClient among WebCrawling instances to access**/
@@ -28,8 +28,13 @@ public class WebCrawling extends Crawling<WebPage> {
 
     public WebCrawling(WebPage crawlData){
         super(crawlData);
-        System.out.println("WebCrawling(CrawlData);");//OK
     }
+
+    /**
+     * Crawls a given web page and returns a result or updated crawl data.
+     * @return a result of web page which is updated.
+     * @throws NoCrawlingTargetException
+     */
     @Override
     public WebPage call() throws NoCrawlingTargetException { // TODO: 16. 10. 22 Add Time-out function to be cancelled.
         String content;
@@ -50,7 +55,6 @@ public class WebCrawling extends Crawling<WebPage> {
             try { response.close();
             } catch (IOException e) {}
         }
-
 //        page.update(status, headers, content);
         return page; // TODO: Caller handles page to be store. 
     }

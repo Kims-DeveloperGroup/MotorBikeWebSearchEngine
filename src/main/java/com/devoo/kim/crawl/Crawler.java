@@ -36,7 +36,7 @@ public class Crawler implements TaskListener<CrawlData>{
     String outputPath;
     StorageLoader storageLoader;
     int statusofLoader;
-    CrawlingScheduler<WebPage> crawlingScheduler;
+    CrawlingScheduler crawlingScheduler;
     int statusOfScheduler;
     CrawlingGenerator crawlingGenerator;
     int statusOfGenerator;

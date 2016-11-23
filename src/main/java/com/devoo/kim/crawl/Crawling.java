@@ -21,10 +21,6 @@ abstract public class Crawling <SubTypeOfCrawlData extends CrawlData> extends Ta
     /**By using 'Generic type', different sub-classes are offered to use their own type of 'CrawlData'.
      * But they share the common interface.
      **/
-
-
-
-
     @Override
     abstract public SubTypeOfCrawlData call() throws CrawlingException;
 

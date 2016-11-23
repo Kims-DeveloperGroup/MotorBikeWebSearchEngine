@@ -6,6 +6,8 @@ import com.devoo.kim.task.AsyncTaskWatcher;
 import com.devoo.kim.task.listener.TaskListener;
 import com.devoo.kim.storage.data.CrawlData;
 import com.devoo.kim.task.Task;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 
 import java.lang.ref.WeakReference;
 import java.util.Collection;
@@ -15,7 +17,8 @@ import java.util.concurrent.atomic.AtomicInteger;
 /**
  *
  */
-public class CrawlingScheduler<T1> { // TODO: Handle Multi-Thread Issue
+public class CrawlingScheduler { // TODO: Handle Multi-Thread Issue
+    Logger logger = LoggerFactory.getLogger(CrawlingScheduler.class);
 
     private int threads=-1;
     AtomicInteger currTasks = new AtomicInteger(0);
@@ -44,37 +47,54 @@ public class CrawlingScheduler<T1> { // TODO: Handle Multi-Thread Issue
         this(listener, crawlingQueue, Runtime.getRuntime().availableProcessors());
     }
 
+    public CrawlingScheduler(BlockingQueue<Crawling> crawlingQueue){
+        this(null, crawlingQueue, Runtime.getRuntime().availableProcessors());
+    }
+
+    @Deprecated
     public CrawlingScheduler(TaskListener listener, CrawlingGenerator crawlingGenerator){
         this(listener, crawlingGenerator.getCrawlingQueue(), Runtime.getRuntime().availableProcessors());
         this.crawlingGenerator =crawlingGenerator;
     }
 
+    /**
+     * Submits tasks(type of WebCrawling) asynchronously.
+     * That Keeps polling crawling tasks from a given queue, and waiting for an item.
+     * @Note: if the queue is still empty even after time-out, the method is returned.
+     */
     public void submitTasks(){
-        Task task;
+        Crawling crawling;
         Future<CrawlData> future;
-        if (!crawlingGenerator.isAlive()) {
-            // TODO: 16. 11. 17 Handle a Dead Generator.
-        }
         taskWatcher.start();
-        while (crawlingGenerator.isAlive() || !crawlingQueue.isEmpty()){
-            try {
-                if (!taskWatcher.isAlive()){ //Restarts taskWatcher if it's not running.
-                    taskWatcher=new AsyncTaskWatcher(taskListener,threads);
-                    weakTaskWatcher= new WeakReference(taskWatcher);
-                }
-                task = crawlingQueue.poll(1L, TimeUnit.MILLISECONDS);
-                if (task == null) continue;
 
-                future=executorService.submit(task);
-                taskWatcher.put(future); /**Possibly Blocked (=> Limit the number of running task)**/
-            } catch (InterruptedException e) {}
+        while (true){
+            try { // TODO: 16. 11. 24 Find the better to handle exception.
+                if (!taskWatcher.isAlive()) { //Restarts taskWatcher if it's not running.
+                    taskWatcher = new AsyncTaskWatcher(taskListener, threads);
+                    taskWatcher.start();
+                    weakTaskWatcher = new WeakReference(taskWatcher);
+                }
+                crawling = crawlingQueue.poll(10L, TimeUnit.MILLISECONDS);
+                if (crawling == null) break;
+
+                future = executorService.submit(crawling);//exception point #1
+                totalTasks.incrementAndGet();
+                /**Possibly Blocked (=> Limit the number of running crawling)**/
+                taskWatcher.put(future); //exception point #2
+            }catch (InterruptedException e){}
         }
-        shutdown();
+        try {// TODO: 16. 11. 24 Find the better to handle exception.
+            taskWatcher.join(); //exception point #3
+        }catch (InterruptedException e){}
+        finally {
+            logger.info("Total Running Time: {} (sec)", totalWorkingTime/1000);
+            logger.info("Total Submitted Tasks: {}", totalTasks);
+            shutdown();
+        }
     }
 
     /***
      * Check whether this 'CrawlingScheduler' is shutdown or not.
-     *
      * @return true if 'CrawlingScheduler' is shut down.
      */
     public void shutdown(){
@@ -90,7 +110,6 @@ public class CrawlingScheduler<T1> { // TODO: Handle Multi-Thread Issue
         }
         endTime =System.currentTimeMillis();
         totalWorkingTime = endTime -startTime;
-        System.out.println("Total Working Time(/sec): " + totalWorkingTime/1000+ "(sec)");// TODO: 16. 10. 15 Log
     }
 
     /**
