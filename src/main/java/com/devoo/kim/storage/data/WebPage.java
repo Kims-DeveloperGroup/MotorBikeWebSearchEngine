@@ -12,7 +12,7 @@ import java.util.Map;
  *                  and the response headers of the last request.
  */
 public class WebPage extends CrawlData {
-    private final String DATA_TYPE ="WebPage";
+    private final String DATA_TYPE ="webpage";
     public URL url; // TODO:Make final
     public String urlStr; // TODO:Make final
     private Map<String, WebPage> outlinks= new HashMap<>(4);// TODO: 16. 10. 18 How-To-Handle 
@@ -27,6 +27,8 @@ public class WebPage extends CrawlData {
      * @param headers : Response 'Header-s'
      * @throws MalformedURLException
      */
+
+    // TODO: 16. 10. 31 URL Normalizer 
     public WebPage(String url, int status, String document, Header[] headers) throws MalformedURLException {
         this(url, status, document);
         this.headers = headers;

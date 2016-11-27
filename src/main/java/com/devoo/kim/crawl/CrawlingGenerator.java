@@ -3,13 +3,15 @@ package com.devoo.kim.crawl;
 import com.devoo.kim.context.Contexts;
 import com.devoo.kim.storage.Storage;
 import com.devoo.kim.storage.data.CrawlData;
+import com.devoo.kim.storage.exception.StorageException;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 
 import java.util.HashMap;
 import java.util.Iterator;
 import java.util.Map;
 import java.util.concurrent.BlockingQueue;
 import java.util.concurrent.LinkedBlockingDeque;
-import java.util.concurrent.atomic.AtomicInteger;
 
 
 /**
@@ -17,75 +19,76 @@ import java.util.concurrent.atomic.AtomicInteger;
  * @NOTE: This 'CrawlingGenerator' generates only 'Crawling' tasks, but not parsing and injection.
  */
 public class CrawlingGenerator extends Thread {// TODO: Handle Multi-Thread Issue (not supported yet)
-    int maxTasks =-1;
-    private AtomicInteger status =new AtomicInteger(Crawler.NOT_INITIALLZED); // TODO: 16. 10. 20 Find out whether 'AtomicInterger' is appropriate to guarantee a consistent monitor of status for CrawlingGenerator.
     private Map<String, Storage> storages;
     private BlockingQueue<Crawling> crawlingQueue;
+    private static int capacity =1000;
+
     // TODO: Log:  Count total size of output and Running Time.
+    Logger logger = LoggerFactory.getLogger(CrawlingGenerator.class+getName());
+    long initTime=-1;
+    long endTime=-1;
+    long runningTime =-1;
 
     /**
-     *
      * @param storages ,from which instances of 'CrawlData' are loaded.
-     * @param maxTasks ,of which tasks wait in the 'CrawlingQueue'
+     * @param size ,of which tasks wait in the 'CrawlingQueue'
      */
-
-    public CrawlingGenerator(HashMap<String, Storage> storages, int maxTasks){
-        this(storages);
-        this.maxTasks = maxTasks;
+    public CrawlingGenerator(HashMap<String, Storage> storages, int size){
+        this.storages =storages;
+        this.crawlingQueue = new LinkedBlockingDeque<>(size);
     }
 
     public CrawlingGenerator(HashMap<String, Storage> storages){
-        this.storages =storages;
-        this.crawlingQueue = new LinkedBlockingDeque<>();
-        this.status.set(Crawler.READY);/**#READY**/
+        this(storages, capacity);
     }
 
-
-
-    /***
+    /**
      * Generates 'CrawlingTask-s' and enqueue them into 'TaskQueue'. 'CrawlingScheduler' will take 'Crawling' tasks from 'crawlingQueue' and will run tasks.
      * The inputs of Tasks, 'CrawlData-s' are loaded from Storage, which possibly causes delay to load data/files from physical storage.
      */
-
     @Override
-    public synchronized void start() {
+    public void run() {
+        logger.info("Started at: "+ (initTime=System.currentTimeMillis()));
         String key;
         Storage storage;
-        Iterator<CrawlData> iterator;// iteration 'CrawlData-s' from a loaded 'Storage'
+        Iterator<CrawlData> crawlDatas;// iteration 'CrawlData-s' from a loaded 'Storage'
         CrawlData crawlData;
         Crawling crawlTask;
         for (Map.Entry<String, Storage> storageEntry : storages.entrySet()){
-            this.status.set(Crawler.RUNNING); /**#RUNNING**/
             key = storageEntry.getKey();
             storage = storageEntry.getValue();
-            if (!storage.isValid()){
-                continue; // TODO: 16. 10. 18 Log: Metadata of Invalid Storage
-            }
             try{
-                this.status.set(Crawler.DELAYED);/**#DELAYED(for loading 'CrawlData-s')**/
-                iterator=storage.load().iterateCrawlData();
-                while (iterator.hasNext()){
-                    this.status.set(Crawler.RUNNING); /**#RUNNING**/
-                    crawlData= iterator.next();
-                    crawlTask =Contexts.generateCrawling(crawlData);
-                    this.status.set(Crawler.WAITING);
-                    crawlingQueue.put(crawlTask);/**#WAITING (Being blocked until crawlingQueue is available to put).
-                     Possibly Deadlock (crawlingQueue is being taken && crawlingQueue)**/
+                crawlDatas=storage.getCrawlData().iterator();
+                while (crawlDatas.hasNext()){
+                    crawlData = crawlDatas.next();
+                    crawlTask = Contexts.generateCrawling(crawlData);
+                    crawlingQueue.put(crawlTask);
                 }
-            }catch (Exception e){}
+            }catch (StorageException e) {continue;}
+             catch (InterruptedException e) {}
         }
-        this.status.set(Crawler.COMPLETE);/**#COMPLETE**/
+        logger.info("Finished at: {}",(endTime=System.currentTimeMillis()));
+        logger.info("Running Time: {} /mill", (endTime-initTime));
     }
 
     public BlockingQueue<Crawling> getCrawlingQueue(){
         return this.crawlingQueue;
     }
+    public boolean isEmpty(){
+        return crawlingQueue.isEmpty();
+    }
+    /**
+     * @return the current count of generated Crawling-s.
+     */
+    public int size(){return crawlingQueue.size();}
+
+    /**
+     * @return total capacity of Crawling Queue
+     */
+    public int getCapacity(){return capacity;}
 
     /***
      * By calling this method, outside objects monitor the status of this.
      * @return the current status of this 'CrawlingGenerator'
      */
-    public AtomicInteger getStatus(){
-        return this.status;
-    }
 }

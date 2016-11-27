@@ -1,25 +1,25 @@
 package com.devoo.kim.storage;
 
 import com.devoo.kim.storage.data.CrawlData;
-import com.devoo.kim.storage.fs.CrawlDataFile;
+import com.devoo.kim.storage.exception.InvaildStorageException;
+import com.devoo.kim.storage.exception.StorageLoadException;
 
 import java.io.Closeable;
-import java.io.File;
-import java.io.FileReader;
 import java.util.Iterator;
+import java.util.List;
 
 /**
  *@Responsibility: An abstraction of storage loaded on memory. e.g) Local File System, HDFS, etc.
  *
  * @Behavior: This interface is not a concrete, but offers interface to implement concrete behaviors.
  */
-public interface Storage extends Closeable{
+public interface Storage<TypeOfStorage> extends Closeable{
 
     /**
      * Connect/Access to this Storage
      * @return: true if the storage is connected/accessed with valid condition.
      */
-    public boolean connect();
+    public boolean connect(String path) throws InvaildStorageException;
     /**
      *
      * @return true if the storage has valid condition. Otherwise, false.
@@ -33,7 +33,7 @@ public interface Storage extends Closeable{
      * @return Loaded data set/files
      * @throws Exception in case of failure
      */
-    public Storage load() throws Exception; // TODO: 16. 10. 20 Define StorageLoadFailure Exception.
+    public void load() throws Exception; // TODO: 16. 10. 20 Define StorageLoadFailure Exception.
 
     /**
      * Tries to reload data/files on memory from physical storage.
@@ -41,13 +41,15 @@ public interface Storage extends Closeable{
      * @return
      * @throws Exception
      */
-    public Storage reload() throws Exception; // TODO: Define StorageLoadFailure Exception.
+    public void reload() throws Exception; // TODO: Define StorageLoadFailure Exception.
 
     /***
-     * Iterates 'CrawlData-s' from the beginning of loaded data,
-     * and generates 'Task' with 'CrawlData'
-     * @return an instance of 'Task'
+     * Gets 'CrawlData-s' from loaded 'CrawlDataFile-s'
+     * @return instances of 'CrawData-s'
      */
-    public Iterator<CrawlData> iterateCrawlData();
+    public List<CrawlData> getCrawlData() throws InvaildStorageException, StorageLoadException;
     // TODO: 16. 10. 17 Think how to implement close();
+
+    public TypeOfStorage getRoot();
+
 }
