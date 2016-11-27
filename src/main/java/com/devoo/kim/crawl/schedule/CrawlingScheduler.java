@@ -26,7 +26,7 @@ public class CrawlingScheduler { // TODO: Handle Multi-Thread Issue
     private long totalWorkingTime;
     private long startTime;
     private long endTime;
-    private long timeout;
+    private long timeout; //todo:
     ExecutorService executorService;//// TODO: NOT Thread-Safe(?)
     WeakReference<AsyncTaskWatcher> weakTaskWatcher;
     AsyncTaskWatcher taskWatcher;
@@ -60,6 +60,7 @@ public class CrawlingScheduler { // TODO: Handle Multi-Thread Issue
     /**
      * Submits tasks(type of WebCrawling) asynchronously.
      * That Keeps polling crawling tasks from a given queue, and waiting for an item.
+     *
      * @Note: if the queue is still empty even after time-out, the method is returned.
      */
     public void submitTasks(){
@@ -79,17 +80,22 @@ public class CrawlingScheduler { // TODO: Handle Multi-Thread Issue
 
                 future = executorService.submit(crawling);//exception point #1
                 totalTasks.incrementAndGet();
-                /**Possibly Blocked (=> Limit the number of running crawling)**/
+                /*** Possibly Blocked (=> Limit the number of running crawling) ***/
                 taskWatcher.put(future); //exception point #2
             }catch (InterruptedException e){}
         }
-        try {// TODO: 16. 11. 24 Find the better to handle exception.
+        try {
+            // TODO: 16. 11. 24 Find the better to handle exception.
+            taskWatcher.terminates();
             taskWatcher.join(); //exception point #3
+
         }catch (InterruptedException e){}
         finally {
-            logger.info("Total Running Time: {} (sec)", totalWorkingTime/1000);
-            logger.info("Total Submitted Tasks: {}", totalTasks);
+            endTime =System.currentTimeMillis();
+            totalWorkingTime = endTime -startTime;
             shutdown();
+            logger.info("Total Running Time: {}(/sec)", totalWorkingTime/1000);
+            logger.info("Total Submitted Tasks: {}", totalTasks);
         }
     }
 

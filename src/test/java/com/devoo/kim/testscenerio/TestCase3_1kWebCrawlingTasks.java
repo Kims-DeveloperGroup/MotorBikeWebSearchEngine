@@ -16,7 +16,15 @@ import java.util.concurrent.TimeUnit;
 public class TestCase3_1kWebCrawlingTasks {
     public static String STORAGE_PATH ="src/test/resources/testcase3/";
 
-
+    /**
+     * Generates temporary crawling tasks with non-existing urls.
+     * @param size of tasks to be generated into a queue.
+     * @return a queue containing a given size of crawling tasks.
+     *
+     * @throws InvaildStorageException
+     * @throws MalformedURLException
+     * @throws InterruptedException
+     */
 
     public BlockingQueue<Crawling> generateTestCrawlingTasks(int size)
             throws InvaildStorageException, MalformedURLException, InterruptedException {
