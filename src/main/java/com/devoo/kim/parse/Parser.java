@@ -6,7 +6,7 @@ import com.devoo.kim.task.Task;
 /**
  * Created by devoo-kim on 16. 10. 12.
  */
-public class Parser extends Task {
+public abstract class Parser extends Task {
 
     public Parser(CrawlData crawlData) {
 //        super(crawlData);
@@ -14,6 +14,9 @@ public class Parser extends Task {
 
     @Override
     public Object call() throws Exception {
+        parse();
         return null;
     }
+
+    abstract public void parse();
 }
