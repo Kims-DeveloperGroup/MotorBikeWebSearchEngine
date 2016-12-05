@@ -88,34 +88,26 @@ public class CrawlingScheduler { // TODO: Handle Multi-Thread Issue
             // TODO: 16. 11. 24 Find the better to handle exception.
             taskWatcher.terminates();
             taskWatcher.join(); //exception point #3
-
         }catch (InterruptedException e){}
-        finally {
-            endTime =System.currentTimeMillis();
-            totalWorkingTime = endTime -startTime;
-            shutdown();
-            logger.info("Total Running Time: {}(/sec)", totalWorkingTime/1000);
-            logger.info("Total Submitted Tasks: {}", totalTasks);
-        }
     }
 
-    /***
+    /**
      * Check whether this 'CrawlingScheduler' is shutdown or not.
      * @return true if 'CrawlingScheduler' is shut down.
      */
     public void shutdown(){
-        //TODO: Terminate this and kill working thread properly.(Not guarantee yet.)
-        //TODO: is called when 'Submissions'.isEmpty() && crawlingQueue.isEmpty() && TaskGen.status== 'Complete/Terminate'
+        executorService.shutdown();
         try {
-            if (!executorService.awaitTermination(10L, TimeUnit.SECONDS))
-                executorService.shutdownNow();
-            if (!executorService.awaitTermination(10L, TimeUnit.SECONDS)) //Double Check of ThreadPool and Tasks being terminated at all.
+            if (!executorService.awaitTermination(3L, TimeUnit.SECONDS))
                 executorService.shutdownNow();
         } catch (InterruptedException e) {
+        }finally {
             executorService.shutdownNow(); //To handle the case of Thread  interruption.
+            endTime =System.currentTimeMillis();
+            totalWorkingTime = endTime -startTime;
+            logger.info("Total Running Time: {}(/sec)", totalWorkingTime/1000);
+            logger.info("Total Submitted Tasks: {}", totalTasks);
         }
-        endTime =System.currentTimeMillis();
-        totalWorkingTime = endTime -startTime;
     }
 
     /**

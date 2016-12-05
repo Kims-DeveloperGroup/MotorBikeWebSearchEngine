@@ -17,6 +17,7 @@ public class AsyncTaskWatcher extends Thread{
     private long period = 500L;
     private TaskListener listener;
     private BlockingQueue<Future> futures;
+    private int total =0;
     private int completed=0;
     private int canceled=0;
 
@@ -48,6 +49,7 @@ public class AsyncTaskWatcher extends Thread{
      */
     public void put(Future future) throws InterruptedException {
         futures.put(future);
+        total++;
     }
     // TODO: Possibility of Deadlock : Calling outside method,
     // which might request for a lock, or wait until some condition.
@@ -58,18 +60,20 @@ public class AsyncTaskWatcher extends Thread{
      */
     @Override
     public void run() {
-        logger.info("Current Running Task: {}, Completed: {}, Canceled: {}",
-                futures.size(), completed, canceled);
         status = RUNNING;
+        // TODO: 16. 11. 23 set time-out of task to prevent infinite waiting.
         try {
             while (isRunnable()) { // TODO: 16. 10. 25 How to exit of loop?
                 Thread.sleep(period);
-                futures.forEach(future -> { // TODO: 16. 10. 24 Set Timeout for traversal of Collection<Future> to avoid deadlock.
+                futures.forEach(future -> {
                     watch(future);
                 });
             }
-        }catch (InterruptedException e){}finally {
+        }catch (InterruptedException e){
+        }finally {
             status= TERMINATED;
+            logger.info("Current Running Task: {}, Completed: {}, Canceled: {}, Remaining: {}",
+                    total, completed, canceled, futures.size());
         }
     }
 
@@ -80,15 +84,19 @@ public class AsyncTaskWatcher extends Thread{
      */
     private void watch(Future future){
         if (future.isDone()){
-            if (listener!=null) listener.completeTask(future); // TODO: Being blocked until the method returns. 
+            if (listener!=null) listener.completeTask(future); // TODO: Being blocked until the method returns.
             futures.remove(future);
             completed++;
         }else if (future.isCancelled()){
             futures.remove(future);
             canceled++;
         }
-        // TODO: 16. 11. 23 set time-out of task to prevent infinite waiting.
     }
+
+    /**
+     * Check the Watcher is runnable or not.
+     * @return true if it is, otherwise false if it is terminated.
+     */
     private boolean isRunnable(){
         if ((status==WATING_FOR_TERMINATION && isEmpty())
                 || status== TERMINATED) return false;
