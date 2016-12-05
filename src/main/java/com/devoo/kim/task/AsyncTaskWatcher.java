@@ -102,7 +102,6 @@ public class AsyncTaskWatcher extends Thread{
                 || status== TERMINATED) return false;
         return true;
     }
-
     /**
      * Terminates this Watcher after the 'Future-s' being watched are completed or canceled.
      * @NOTE:
