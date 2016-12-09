@@ -11,6 +11,8 @@ import org.apache.http.impl.client.CloseableHttpClient;
 import org.apache.http.impl.client.HttpClients;
 
 import java.io.IOException;
+import java.net.MalformedURLException;
+import java.util.concurrent.*;
 import java.util.concurrent.atomic.AtomicInteger;
 
 /**
@@ -44,6 +46,7 @@ public class WebCrawling extends Crawling<WebPage> {
         WebPage page = getCrawlData();
         try {
             httpGet = new HttpGet(page.urlStr);
+
             response = httpClient.execute(httpGet);  // TODO: Stuck and Blocked (NOT SOLVED)
             content = new BasicResponseHandler().handleResponse(response);
             status = response.getStatusLine().getStatusCode();
@@ -56,8 +59,23 @@ public class WebCrawling extends Crawling<WebPage> {
             } catch (IOException e) {}
         }
 //        page.update(status, headers, content);
+        System.out.println("Done!");
         return page; // TODO: Caller handles page to be store. 
     }
 
-    public static void main(String[] args){}
+    public static void main(String[] args) throws ExecutionException, InterruptedException {
+        String url ="http://www.naver.com/";
+        try {
+            WebCrawling crawling = new WebCrawling(new WebPage(url));
+            ExecutorService executorService =Executors.newSingleThreadExecutor();
+            Future future =executorService.submit(crawling);
+            while (!future.isDone()) System.out.println("Running...");
+            future.get();
+            executorService.shutdown();
+        } catch (MalformedURLException e) {
+            e.printStackTrace();
+        }
+        System.out.println("Main ends.");
+
+    }
 }

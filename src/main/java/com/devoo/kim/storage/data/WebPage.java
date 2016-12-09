@@ -54,6 +54,10 @@ public class WebPage extends CrawlData {
 //      TODO: 16. 10. 15 Logging
     }
 
+    public String getDocument() {
+        return document;
+    }
+
     @Override
     public String getDataType() {
         return this.DATA_TYPE;
