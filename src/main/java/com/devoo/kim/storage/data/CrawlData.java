@@ -4,12 +4,12 @@ package com.devoo.kim.storage.data;
  * Created by devoo-kim on 16. 10. 12.
  */
 abstract public class CrawlData {
-
+    // TODO: Record Timestamp. 
     public long initDate;
     public long updatedDate;
 
 
-    public void update(){
+    public void setUpdateTime(){
         updatedDate = System.currentTimeMillis();
     }
 

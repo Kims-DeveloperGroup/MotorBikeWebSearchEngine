@@ -58,7 +58,7 @@ public class WebCrawling extends Crawling<WebPage> {
             try { response.close();
             } catch (IOException e) {}
         }
-//        page.update(status, headers, content);
+//        page.setUpdateTime(status, headers, content);
         System.out.println("Done!");
         return page; // TODO: Caller handles page to be store. 
     }

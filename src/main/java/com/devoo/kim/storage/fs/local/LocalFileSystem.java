@@ -24,7 +24,9 @@ import java.util.List;
  *        Also that could reduce performance of the application.
  */
 public class LocalFileSystem implements Storage<File> {
-
+    /**
+     * Filters CrawlDataFile(.crawl) and URLs file(.url)
+     */
     private static class CrawlDataFilter implements FilenameFilter{
         public final String CRAWL_DATA_EXTENSION = CrawlDataFile.EXTENSION;//'.crawl'
         public final String URLS_EXTENSION =".url";

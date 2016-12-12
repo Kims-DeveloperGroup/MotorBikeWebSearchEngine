@@ -87,8 +87,4 @@ public class CrawlingGenerator extends Thread {// TODO: Handle Multi-Thread Issu
      */
     public int getCapacity(){return capacity;}
 
-    /***
-     * By calling this method, outside objects monitor the status of this.
-     * @return the current status of this 'CrawlingGenerator'
-     */
 }

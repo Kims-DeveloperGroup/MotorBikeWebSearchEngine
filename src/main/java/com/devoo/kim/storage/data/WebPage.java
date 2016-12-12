@@ -6,6 +6,7 @@ import java.net.MalformedURLException;
 import java.net.URL;
 import java.util.HashMap;
 import java.util.Map;
+import java.util.Set;
 
 /**
  * @Responsibility: This class contains of metadata of a crawled web page,
@@ -15,10 +16,17 @@ public class WebPage extends CrawlData {
     private final String DATA_TYPE ="webpage";
     public URL url; // TODO:Make final
     public String urlStr; // TODO:Make final
-    private Map<String, WebPage> outlinks= new HashMap<>(4);// TODO: 16. 10. 18 How-To-Handle 
     int status;
     Header[] headers;
     String document;
+
+    // TODO: variables below are processed while parsing.
+    String title; //Unique Name
+    Set<String> tags;//References of the link from other pages. (Similar to Foreign Key)
+    String domain; //From which search comes.
+    int depthFromDomain;
+    Map<String, WebPage> outlinks= new HashMap<>(4);// TODO: 16. 10. 18 How-To-Handle
+    Set<String> keywords;
 
     /***CONSTRUCTOR****
      * @param url :url of web page
@@ -47,7 +55,7 @@ public class WebPage extends CrawlData {
     }
 
     public void update(int status, Header[] headers, String document) {
-        super.update();
+        setUpdateTime();
         this.status = status;
         this.headers =headers;
         this.document =document;

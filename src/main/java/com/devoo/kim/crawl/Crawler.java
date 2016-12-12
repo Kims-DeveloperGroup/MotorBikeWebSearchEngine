@@ -96,5 +96,10 @@ public class Crawler implements TaskListener<CrawlData>{
             e.printStackTrace();
         }
     }
+
+    /**
+     *
+     * @param args
+     */
     public static void main(String[] args){}
 }
