@@ -54,14 +54,43 @@ public class WebPage extends CrawlData {
         this.url = new URL(url);
     }
 
-    public void update(int status, Header[] headers, String document) {
-        setUpdateTime();
+    /**Setter**/
+    public void setStatus(int status) {
         this.status = status;
-        this.headers =headers;
-        this.document =document;
-//      TODO: 16. 10. 15 Logging
     }
 
+    public void setHeaders(Header[] headers) {
+        this.headers = headers;
+    }
+
+    public void setDocument(String document) {
+        this.document = document;
+    }
+
+    public void setTitle(String title) {
+        this.title = title;
+    }
+
+    public void setTags(Set<String> tags) {
+        this.tags = tags;
+    }
+
+    public void setDomain(String domain) {
+        this.domain = domain;
+    }
+
+    public void setDepthFromDomain(int depthFromDomain) {
+        this.depthFromDomain = depthFromDomain;
+    }
+
+    public void setOutlinks(Map<String, WebPage> outlinks) {
+        this.outlinks = outlinks;
+    }
+
+    public void setKeywords(Set<String> keywords) {
+        this.keywords = keywords;
+    }
+    /**Getter**/
     public String getDocument() {
         return document;
     }

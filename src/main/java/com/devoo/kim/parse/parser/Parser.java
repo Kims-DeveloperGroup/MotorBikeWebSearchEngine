@@ -1,4 +1,4 @@
-package com.devoo.kim.parse;
+package com.devoo.kim.parse.parser;
 
 import com.devoo.kim.storage.data.CrawlData;
 import com.devoo.kim.task.Task;
