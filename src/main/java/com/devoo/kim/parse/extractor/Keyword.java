@@ -6,6 +6,7 @@ package com.devoo.kim.parse.extractor;
 public class Keyword implements Extractor {
     @Override
     public String[] extract(String document) {
+        // TODO: Implement extractor of keywords 
         return new String[0];
     }
 }

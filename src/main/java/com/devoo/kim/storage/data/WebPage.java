@@ -5,6 +5,7 @@ import org.apache.http.Header;
 import java.net.MalformedURLException;
 import java.net.URL;
 import java.util.HashMap;
+import java.util.HashSet;
 import java.util.Map;
 import java.util.Set;
 
@@ -20,13 +21,13 @@ public class WebPage extends CrawlData {
     Header[] headers;
     String document;
 
-    // TODO: variables below are processed while parsing.
+    // TODO: Complete Variables to be stored.
     String title; //Unique Name
-    Set<String> tags;//References of the link from other pages. (Similar to Foreign Key)
-    String domain; //From which search comes.
-    int depthFromDomain;
-    Map<String, WebPage> outlinks= new HashMap<>(4);// TODO: 16. 10. 18 How-To-Handle
+    Set<String> tags = new HashSet<>();//References of the link from other pages. (Similar to Foreign Key)
     Set<String> keywords;
+    Map<String, WebPage> outlinks= new HashMap<>(4);// TODO: 16. 10. 18 How-To-Handle
+    String domain; // root url
+    int depthFromDomain;
 
     /***CONSTRUCTOR****
      * @param url :url of web page
@@ -75,6 +76,8 @@ public class WebPage extends CrawlData {
         this.tags = tags;
     }
 
+    public boolean addTag(String tag){ return this.tags.add(tag);}
+
     public void setDomain(String domain) {
         this.domain = domain;
     }
@@ -90,6 +93,7 @@ public class WebPage extends CrawlData {
     public void setKeywords(Set<String> keywords) {
         this.keywords = keywords;
     }
+
     /**Getter**/
     public String getDocument() {
         return document;

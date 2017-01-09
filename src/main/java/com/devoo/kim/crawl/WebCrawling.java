@@ -48,9 +48,16 @@ public class WebCrawling extends Crawling<WebPage> {
             httpGet = new HttpGet(page.urlStr);
 
             response = httpClient.execute(httpGet);  // TODO: Stuck and Blocked (NOT SOLVED)
-            content = new BasicResponseHandler().handleResponse(response);
             status = response.getStatusLine().getStatusCode();
             headers = response.getAllHeaders();
+            if (status <300) {
+                content = new BasicResponseHandler().handleResponse(response);
+                page.setDocument(content);
+            }
+
+            page.setStatus(status);
+            page.setHeaders(headers);
+
         }catch (IOException e) {
             // TODO: Logging for fail crawling
             // TODO: Set Status and info for failure.
@@ -58,9 +65,7 @@ public class WebCrawling extends Crawling<WebPage> {
             try { response.close();
             } catch (IOException e) {}
         }
-//        page.setUpdateTime(status, headers, content);
-        System.out.println("Done!");
-        return page; // TODO: Caller handles page to be store. 
+        return page; // TODO: Caller handles page to be store.
     }
 
     public static void main(String[] args) throws ExecutionException, InterruptedException {

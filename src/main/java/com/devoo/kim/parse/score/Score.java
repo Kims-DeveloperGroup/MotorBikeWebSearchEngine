@@ -2,6 +2,7 @@ package com.devoo.kim.parse.score;
 
 /**
  * Scores a given document.
+ * todo: For what?
  */
 public interface Score {
     /**

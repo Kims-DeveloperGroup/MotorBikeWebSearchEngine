@@ -1,6 +1,9 @@
 package com.devoo.kim.parse.filter;
 
+import com.devoo.kim.storage.data.WebPage;
+
 import java.util.Collection;
+import java.util.Map;
 
 /**
  * @Responsibility: Filters links
@@ -20,4 +23,5 @@ public interface Filter {
      * @param links collection of links to be filtered.
      */
     void filter(Collection links);
+    void filter(Map<String, WebPage> links);
 }

@@ -8,18 +8,24 @@ import org.jsoup.Jsoup;
 import org.jsoup.nodes.Element;
 import org.jsoup.select.Elements;
 
+import java.util.Map;
+
 /**
  * @Responsibility:
- * Parses documents of web pages with defined linkFilter, extractor and score.
+ * Parses documents of web pages with defined linkFilter, outlinkExtractor and score.
  */
-public class BasicWebPageParser implements Parser {
+public class BasicWebPageParser implements Parser<WebPage> {
     Filter linkFilter;
-    Extractor extractor;
+    Extractor outlinkExtractor;
+    Extractor keywordExtractor;
+    // Todo : Filters[] filters
+    // TODO: Extractor[] extractors;
+    // Todo : How to distinguish type of filters and extractors
     Score score;
 
-    public BasicWebPageParser(Filter linkFilter, Extractor extractor, Score score) {
+    public BasicWebPageParser(Filter linkFilter, Extractor outlinkExtractor, Score score) {
         this.linkFilter = linkFilter;
-        this.extractor =extractor;
+        this.outlinkExtractor = outlinkExtractor;
         this.score = score;
     }
 
@@ -34,12 +40,20 @@ public class BasicWebPageParser implements Parser {
     public void parse(WebPage page){
         Element doc= Jsoup.parse(page.getDocument());
         String title = doc.getElementsByTag("title").text();
+        page.setTitle(title);
         Elements outlinks = doc.getElementsByTag("a");
 
         // TODO: 16. 12. 23 Add out-links.
         String[] keywords;
-        linkFilter.filter(outlinks);
-        keywords = extractor.extract(doc.outerHtml());
-//        score.score()
+        if (linkFilter!=null)
+            linkFilter.filter(outlinks);
+        page.setOutlinks(null);
+        if (outlinkExtractor !=null)
+            keywords = outlinkExtractor.extract(doc.outerHtml());
+        if (score!=null) {
+            // TODO: Define the purpose of 'Score'.(ex: Priorioty or Accuracy ?)
+            score.score(doc.outerHtml());
+        }
     }
+
 }

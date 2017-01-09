@@ -44,10 +44,6 @@ public class Crawler implements TaskListener<CrawlData>{
     List<CrawlDataFile> outputFiles = new LinkedList<>();
     BlockingQueue<CrawlData> results = new LinkedBlockingQueue(100);
 
-
-
-    ;
-
     public Crawler(String[] inputPath, String outputPath){
         this.inputPath = inputPath;
         this.outputPath= outputPath;
@@ -59,6 +55,7 @@ public class Crawler implements TaskListener<CrawlData>{
             storageLoader = StorageLoader.initialize(inputPath);
             crawlingGenerator = new CrawlingGenerator(storageLoader.getStorages());
             crawlingGenerator.start();
+            // TODO: 17. 1. 9 Make an independant module of a listener
             crawlingScheduler = new CrawlingScheduler(this, crawlingGenerator);
             crawlingScheduler.submitTasks();
                 // TODO: Re-create CrawlingGen & CrawlingScheduler if they are not alive.
