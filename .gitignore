@@ -1,0 +1,8 @@
+*.iml
+out
+.gradle
+build
+.idea
+gradle*
+*.txt
+*.exe
